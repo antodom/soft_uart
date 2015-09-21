@@ -24,7 +24,7 @@ The objects provided by this library for the software serial ports are: serial_t
 
 Each software serial object implies the use of a Timer Counter (TC) module channel of the ATSAM3X8E. Remember that there are three timer counter modules on the micro-controller, each one with three channels. In total nine timer/counter channels denoted by TC0, TC1, TC2, TC3, TC4, TC5, TC6, TC7 and TC8, respectively. This library uses for implementing a software serial port a specific timer/counter channel. That is, TC0 for serial_tc0, TC1 for serial_tc1, etc. In addition, each software serial port object can be configured for using any pair of I/O pins available on the micro-controller as RX (reception) and TX (transmission) pins for the serial port.
 
-For setting a software serial port object you must use member function begin(), where you specify the RX and TX pins, the serial bit (baud) rate, the data bits (5, 6, 7 or 8), the parity (either no parity, or even or odd parity), and the use of one or two stop bits. The next snippet of code shows and example:
+For setting a software serial port object you must use member function begin(), where you specify the RX and TX pins, the serial bit (baud) rate, the data bits (5, 6, 7, 8 or 9), the parity (either no parity, or even or odd parity), and the use of one or two stop bits. The next snippet of code shows and example:
 
 ```
   // serial_tc4 initialization
@@ -51,7 +51,11 @@ In addition you must add the flag -std=gnu++11 for compiling. For doing that add
 
 ### 3. Examples
 
-On the examples directory there is an example that illustrates the use of soft_uart, using software serial port object serial_tc4 with pins 10 and 11, as RX and TX pins respectively, and Serial2. For having this example working, you should connect the RX pin of Serial2 to pin 11, and Serial2's TX pin to pin 10. Mind that soft_uart software serial objects can be used in the same way that Serial, Serial1, Serial2 and Serial3 hardware serial objects.
+On the examples directory you have available a couple of examples illustrating the use of soft_uart.
+
+Example *soft_uart_serial_test.ino* uses software serial port object serial_tc4 with pins 10 and 11, as RX and TX pins respectively, and Serial2. For having this example working, you should connect the RX pin of Serial2 to pin 11, and Serial2's TX pin to pin 10. Mind that soft_uart software serial objects can be used in the same way that Serial, Serial1, Serial2 and Serial3 hardware serial objects.
+
+Example *soft_uart_serial_test_auto.ino* illustrates how to use a serial port object with itself, in this case serial_tc4, like in the previous example. In addition, the example uses also a serial mode of 9 bit length which is not possible with the current Arduino standard library. 
 
 ### 4. Reception errors
 

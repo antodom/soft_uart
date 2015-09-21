@@ -527,6 +527,8 @@ namespace arduino_due
     {
       public:
 
+	typedef uart<TIMER,RX_BUFFER_LENGTH,TX_BUFFER_LENGTH> raw_uart;
+
 	serial() 
 	{ 
 	  _peek_data_valid_=false; 
@@ -620,12 +622,21 @@ namespace arduino_due
 	  ); 
 	} 
 
+	size_t write(uint32_t data) 
+	{
+	  return (
+	      (_tc_uart_.set_tx_data(data))? 
+	        1: 0 
+	  ); 
+	}
+
 	using Print::write; // pull in write(str) and write(buf, size) from Print
 	operator bool() { return true; } 
 
       private:
 
-	uart<TIMER,RX_BUFFER_LENGTH,TX_BUFFER_LENGTH> _tc_uart_;
+	//uart<TIMER,RX_BUFFER_LENGTH,TX_BUFFER_LENGTH> _tc_uart_;
+	raw_uart _tc_uart_;
 
 	uint32_t _last_data_;
 	uint32_t _last_data_status_;
