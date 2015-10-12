@@ -117,6 +117,13 @@ namespace arduino_due
       TIMER_IDS
     };
 
+    enum class mode_codes: uint32_t
+    {
+      FULL_DUPLEX=0,
+      RX_MODE=1,
+      TX_MODE=2
+    };
+
     enum default_pins: uint32_t
     {
       DEFAULT_RX_PIN=2,
@@ -135,7 +142,8 @@ namespace arduino_due
       EVERYTHING_OK=0,
       BAD_BIT_RATE_ERROR=-1,
       BAD_RX_PIN=-2,
-      BAD_TX_PIN=-3
+      BAD_TX_PIN=-3,
+      BAD_HALF_DUPLEX_PIN=-4
     };
 
     enum class data_bit_codes: uint32_t
@@ -213,7 +221,8 @@ namespace arduino_due
 	  uint32_t bit_rate = bit_rates::DEFAULT_BIT_RATE,
 	  data_bit_codes the_data_bits = data_bit_codes::EIGHT_BITS,
 	  parity_codes the_parity = parity_codes::EVEN_PARITY,
-	  stop_bit_codes the_stop_bits = stop_bit_codes::ONE_STOP_BIT
+	  stop_bit_codes the_stop_bits = stop_bit_codes::ONE_STOP_BIT,
+	  mode_codes mode = mode_codes::FULL_DUPLEX
 	) 
 	{ 
 	  if(rx_pin>=NUM_DIGITAL_PINS)
@@ -221,6 +230,11 @@ namespace arduino_due
 
 	  if(tx_pin>=NUM_DIGITAL_PINS)
 	    return return_codes::BAD_TX_PIN;
+
+	  if(
+	      (mode!=mode_codes::FULL_DUPLEX) &&
+	      (rx_pin!=tx_pin)
+	  ) return return_codes::BAD_HALF_DUPLEX_PIN;
 
 	  return_codes ret_code=
 	    _ctx_.config(
@@ -235,15 +249,66 @@ namespace arduino_due
 
 	  if(ret_code!=return_codes::EVERYTHING_OK) return ret_code;
 
-	  // configure & attatch interrupt on rx pin
-	  pinMode(rx_pin,INPUT);
-	  attachInterrupt(rx_pin,uart::rx_interrupt,CHANGE);
+	  switch(mode)
+	  {
+	    case mode_codes::FULL_DUPLEX:
+	      
+	      // cofigure tx pin
+	      pinMode(tx_pin,OUTPUT);
+	      digitalWrite(tx_pin,HIGH);
 
-	  // cofigure tx pin
-	  pinMode(tx_pin,OUTPUT);
-	  digitalWrite(tx_pin,HIGH);
+	    case mode_codes::RX_MODE:
+	      
+	      // configure & attatch interrupt on rx pin
+	      pinMode(rx_pin,INPUT);
+	      attachInterrupt(rx_pin,uart::rx_interrupt,CHANGE);
 
+	      _ctx_.enable_rx_interrupts(); 
+	      break;
+
+	    case mode_codes::TX_MODE:
+	      // cofigure tx pin
+	      pinMode(tx_pin,OUTPUT);
+	      digitalWrite(tx_pin,HIGH);
+	  }
+
+	  _mode_=mode;
 	  return return_codes::EVERYTHING_OK;
+	}
+
+	mode_codes get_mode() { return _mode_; }
+
+        bool set_rx_mode()
+	{
+	  if(_mode_==mode_codes::FULL_DUPLEX) return false;
+
+	  if(_mode_==mode_codes::RX_MODE) return true; 
+	  flush();
+
+	  pinMode(_ctx_.rx_pin,INPUT);
+	  attachInterrupt(_ctx_.rx_pin,uart::rx_interrupt,CHANGE);
+	  
+	  _mode_=mode_codes::RX_MODE; _ctx_.enable_rx_interrupts(); 
+	  return true;
+	}
+
+	bool set_tx_mode()
+	{
+	  if(_mode_==mode_codes::FULL_DUPLEX) return false;
+
+	  if(_mode_==mode_codes::TX_MODE) return true; 
+
+	  _ctx_.disable_rx_interrupts();
+	  while(
+	    _ctx_.rx_status!=rx_status_codes::LISTENING
+	  ) _ctx_.enable_rx_interrupts();
+
+	  detachInterrupt(_ctx_.rx_pin);
+	  pinMode(_ctx_.tx_pin,OUTPUT);
+	  digitalWrite(_ctx_.tx_pin,HIGH);
+
+	  _mode_=mode_codes::TX_MODE;
+	  return true;
 	}
 
 	void end() { _ctx_.end(); }
@@ -283,9 +348,9 @@ namespace arduino_due
 	bool bad_stop_bit(uint32_t status) 
 	{ return _ctx_.bad_stop_bit(status); }
 
-	// NOTE: data is 5, 6, 7 or 8 bits length
+	// NOTE: data is 5, 6, 7, 8 or 9 bits length
 	bool set_tx_data(uint32_t data) 
-	{ return _ctx_.set_tx_data(data); }
+	{ return ((_mode_!=mode_codes::RX_MODE)? _ctx_.set_tx_data(data): false); }
 
 	tx_status_codes get_tx_status() { return _ctx_.get_tx_status(); }
 	void flush() { _ctx_.flush(); }
@@ -313,7 +378,7 @@ namespace arduino_due
 
 	    disable_tc_interrupts(); disable_rx_interrupts();
 
-	    stop_tc_interrupts(); detachInterrupt(_ctx_.rx_pin);
+	    stop_tc_interrupts(); detachInterrupt(rx_pin);
 
 	    pmc_disable_periph_clk(uint32_t(timer_p->irq));
 	  }
@@ -366,8 +431,8 @@ namespace arduino_due
 	  bool bad_stop_bit(uint32_t status)
 	  { return (status&rx_data_status_codes::BAD_STOP_BIT); }
 
-	  // NOTE: only the 5, 6, 7 or 8 lowest significant bits of
-	  // data are send
+	  // NOTE: only the 5, 6, 7, 8  or 9 lowest significant bits
+	  // of data are send
 	  bool set_tx_data(uint32_t data);
 
 	  void flush()
@@ -517,6 +582,8 @@ namespace arduino_due
 	};
   
         static _uart_ctx_ _ctx_;
+
+	mode_codes _mode_;
     };
 
     template<
@@ -553,7 +620,8 @@ namespace arduino_due
 	  uint32_t bit_rate = bit_rates::DEFAULT_BIT_RATE,
 	  data_bit_codes the_data_bits = data_bit_codes::EIGHT_BITS,
 	  parity_codes the_parity = parity_codes::NO_PARITY,
-	  stop_bit_codes the_stop_bits = stop_bit_codes::ONE_STOP_BIT
+	  stop_bit_codes the_stop_bits = stop_bit_codes::ONE_STOP_BIT,
+	  mode_codes mode = mode_codes::FULL_DUPLEX
 	)
 	{
 	  _tc_uart_.config(
@@ -562,7 +630,8 @@ namespace arduino_due
 	    bit_rate,
 	    the_data_bits,
 	    the_parity,
-	    the_stop_bits
+	    the_stop_bits,
+	    mode
 	  );
 	}
 
@@ -629,6 +698,9 @@ namespace arduino_due
 	        1: 0 
 	  ); 
 	}
+
+	bool set_rx_mode() { _tc_uart_.set_rx_mode(); }
+	bool set_tx_mode() { _tc_uart_.set_tx_mode(); }
 
 	using Print::write; // pull in write(str) and write(buf, size) from Print
 	operator bool() { return true; } 
@@ -752,7 +824,7 @@ namespace arduino_due
 
       config_tc_interrupt();
       stop_tc_interrupts();
-  
+
       return return_codes::EVERYTHING_OK;
     }
 
