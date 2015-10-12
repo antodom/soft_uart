@@ -1,4 +1,4 @@
-## soft_uart v1.0
+## soft_uart v1.1
 
 This is soft_uart library for the Arduino DUE electronic prototyping platform. 
 
@@ -39,7 +39,7 @@ For setting a software serial port object you must use member function begin(), 
 ```
 When using one of those software serial port objects, the TC channel and the RX and TX pins involved can only be used for this purpose, if not its functionality is compromised. Take into account that interrupts for the TC channel and the RX pin involved are used intensively when associated to any of the software serial port objects.
 
-By default, the serial objects work in full-duplex using two pins, namely, the RX pin for data reception, and a TX pin for data transmission. In addition, it is possible to use them in half-duplex mode using only one pin, both for reception and transmission. In this case, it is necessary to set the sotware serial objects in reception or transmission modes, depending on the situation.
+By default, the serial objects work in full-duplex using two pins, namely, a RX pin for data reception, and a TX pin for data transmission. In addition, it is possible to use them in half-duplex mode using only one pin, both for reception and transmission. In this case, it is necessary to set the sotware serial objects in reception or transmission modes, depending on the situation.
 
 ### 2. Download & installation
 
