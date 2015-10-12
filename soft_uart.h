@@ -144,7 +144,8 @@ namespace arduino_due
       BAD_BIT_RATE_ERROR=-1,
       BAD_RX_PIN=-2,
       BAD_TX_PIN=-3,
-      BAD_HALF_DUPLEX_PIN=-4
+      BAD_HALF_DUPLEX_PIN=-4,
+      BAD_MODE=-5
     };
 
     enum class data_bit_codes: uint32_t
@@ -225,7 +226,10 @@ namespace arduino_due
 	  stop_bit_codes the_stop_bits = stop_bit_codes::ONE_STOP_BIT,
 	  mode_codes mode = mode_codes::FULL_DUPLEX
 	) 
-	{ 
+	{
+	  if(mode==mode_codes::INVALID_MODE)
+	    return return_codes::BAD_MODE;
+
 	  if(rx_pin>=NUM_DIGITAL_PINS)
 	    return return_codes::BAD_RX_PIN;
 
