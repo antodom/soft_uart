@@ -39,6 +39,8 @@ For setting a software serial port object you must use member function begin(), 
 ```
 When using one of those software serial port objects, the TC channel and the RX and TX pins involved can only be used for this purpose, if not its functionality is compromised. Take into account that interrupts for the TC channel and the RX pin involved are used intensively when associated to any of the software serial port objects.
 
+By default, the serial objects work in full-duplex using two pins, namely, the RX pin for data reception, and a TX pin for data transmission. In addition, it is possible to use them in half-duplex mode using only one pin, both for reception and transmission. In this case, it is necessary to set the sotware serial objects in reception or transmission modes, depending on the situation.
+
 ### 2. Download & installation
 
 The  library  is  available  through  an  open	git  repository  available   at:
@@ -51,11 +53,13 @@ In addition you must add the flag -std=gnu++11 for compiling. For doing that add
 
 ### 3. Examples
 
-On the examples directory you have available a couple of examples illustrating the use of soft_uart.
+On the examples directory you have available several examples illustrating the use of soft_uart.
 
 Example *soft_uart_serial_test.ino* uses software serial port object serial_tc4 with pins 10 and 11, as RX and TX pins respectively, and Serial2. For having this example working, you should connect the RX pin of Serial2 to pin 11, and Serial2's TX pin to pin 10. Mind that soft_uart software serial objects can be used in the same way that Serial, Serial1, Serial2 and Serial3 hardware serial objects.
 
 Example *soft_uart_serial_test_auto.ino* illustrates how to use a serial port object with itself, in this case serial_tc4, like in the previous example. In addition, the example uses also a serial mode of 9 bit length which is not possible with the current Arduino standard library. 
+
+Example *soft_uart_serial_test_half_duplex* uses two software serial objects (serial_tc0 and serial_tc1) both in half duplex mode to communicate each other. And example *soft_uart_serial_test_half_duplex_9O2* shows how to use the same objects using a data length of nine bits, odd parity and two stop bits.
 
 ### 4. Reception errors
 

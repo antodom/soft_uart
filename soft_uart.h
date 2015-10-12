@@ -117,8 +117,9 @@ namespace arduino_due
       TIMER_IDS
     };
 
-    enum class mode_codes: uint32_t
+    enum class mode_codes: int32_t
     {
+      INVALID_MODE=-1,
       FULL_DUPLEX=0,
       RX_MODE=1,
       TX_MODE=2
@@ -210,7 +211,7 @@ namespace arduino_due
 
       public:
 
-        uart() { config(); }
+        uart() { _mode_=mode_codes::INVALID_MODE; }
   
         uart(const uart&) = delete;
 	uart& operator=(const uart&) = delete;
@@ -280,7 +281,10 @@ namespace arduino_due
 
         bool set_rx_mode()
 	{
-	  if(_mode_==mode_codes::FULL_DUPLEX) return false;
+	  if( 
+	    (_mode_==mode_codes::INVALID_MODE) ||
+	    (_mode_==mode_codes::FULL_DUPLEX)
+	  ) return false;
 
 	  if(_mode_==mode_codes::RX_MODE) return true; 
 	  flush();
@@ -294,7 +298,10 @@ namespace arduino_due
 
 	bool set_tx_mode()
 	{
-	  if(_mode_==mode_codes::FULL_DUPLEX) return false;
+	  if( 
+	    (_mode_==mode_codes::INVALID_MODE) ||
+	    (_mode_==mode_codes::FULL_DUPLEX)
+	  ) return false;
 
 	  if(_mode_==mode_codes::TX_MODE) return true; 
 
@@ -350,7 +357,14 @@ namespace arduino_due
 
 	// NOTE: data is 5, 6, 7, 8 or 9 bits length
 	bool set_tx_data(uint32_t data) 
-	{ return ((_mode_!=mode_codes::RX_MODE)? _ctx_.set_tx_data(data): false); }
+	{ 
+	  return (
+	    (
+	      (_mode_==mode_codes::FULL_DUPLEX) ||
+	      (_mode_==mode_codes::TX_MODE)
+	    )? _ctx_.set_tx_data(data): false
+	  ); 
+	}
 
 	tx_status_codes get_tx_status() { return _ctx_.get_tx_status(); }
 	void flush() { _ctx_.flush(); }
@@ -614,6 +628,11 @@ namespace arduino_due
 	  );
 	}
 
+	// NOTE: on function begin() the last function argument
+	// is the operation mode: FULL_DUPLEX (default mode),
+	// RX_MODE and TX_MODE, these last two for half-duplex 
+	// mode of operation. When in half-duplex rx_pin and
+	// and tx_pin should be same 
 	void begin(
 	  uint32_t rx_pin = default_pins::DEFAULT_RX_PIN,
 	  uint32_t tx_pin = default_pins::DEFAULT_TX_PIN,
@@ -699,8 +718,10 @@ namespace arduino_due
 	  ); 
 	}
 
-	bool set_rx_mode() { _tc_uart_.set_rx_mode(); }
-	bool set_tx_mode() { _tc_uart_.set_tx_mode(); }
+	mode_codes get_mode() { return _tc_uart_.get_mode(); }
+
+	bool set_rx_mode() { return _tc_uart_.set_rx_mode(); }
+	bool set_tx_mode() { return _tc_uart_.set_tx_mode(); }
 
 	using Print::write; // pull in write(str) and write(buf, size) from Print
 	operator bool() { return true; } 
