@@ -59,26 +59,23 @@ void setup() {
 
   // serial_tc0 and serital_tc1 initializations.
   // We will initialize both in half-duplex mode, serial_tc1 in reception mode
-  // (RX_MODE) and the other one in transmission mode (TX_MODE). Remember that
-  // the pins used by both software serial objects should be connected. In this
+  // (RX_MODE) and the other one in transmission mode (TX_MODE). In this
   // case we are using a 8E1 serial transmission mode
-  serial_tc0.begin(
-    SERIAL_TC0_PIN, // in half-duplex mode rx and tx pins on the call to func-
-    SERIAL_TC0_PIN, // tion begin() should be the same
+  serial_tc0.half_duplex_begin(
+    SERIAL_TC0_PIN, 
     SOFT_UART_BIT_RATE,
     soft_uart::data_bit_codes::EIGHT_BITS,
     soft_uart::parity_codes::EVEN_PARITY,
     soft_uart::stop_bit_codes::ONE_STOP_BIT,
-    soft_uart::mode_codes::TX_MODE // half-duplex, initially on transmission mode
+    false // on transmission mode (the default is on reception mode) 
   );
-  serial_tc1.begin(
-    SERIAL_TC1_PIN, // in half-duplex mode rx and tx pins on the call to func-
-    SERIAL_TC1_PIN, // tion begin() should be the same
+  serial_tc1.half_duplex_begin(
+    SERIAL_TC1_PIN, 
     SOFT_UART_BIT_RATE,
     soft_uart::data_bit_codes::EIGHT_BITS,
     soft_uart::parity_codes::EVEN_PARITY,
-    soft_uart::stop_bit_codes::ONE_STOP_BIT,
-    soft_uart::mode_codes::RX_MODE // half-duplex, initially on reception mode
+    soft_uart::stop_bit_codes::ONE_STOP_BIT
+    // initially on reception mode, last argument is true by default
   );   
   Serial.println("========================================================");
   Serial.println("========================================================");

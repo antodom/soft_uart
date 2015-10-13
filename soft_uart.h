@@ -144,8 +144,7 @@ namespace arduino_due
       BAD_BIT_RATE_ERROR=-1,
       BAD_RX_PIN=-2,
       BAD_TX_PIN=-3,
-      BAD_HALF_DUPLEX_PIN=-4,
-      BAD_MODE=-5
+      BAD_HALF_DUPLEX_PIN=-4
     };
 
     enum class data_bit_codes: uint32_t
@@ -216,30 +215,23 @@ namespace arduino_due
   
         uart(const uart&) = delete;
 	uart& operator=(const uart&) = delete;
-	
-        return_codes config(
+
+	return_codes config(
 	  uint32_t rx_pin = default_pins::DEFAULT_RX_PIN,
 	  uint32_t tx_pin = default_pins::DEFAULT_TX_PIN,
 	  uint32_t bit_rate = bit_rates::DEFAULT_BIT_RATE,
 	  data_bit_codes the_data_bits = data_bit_codes::EIGHT_BITS,
 	  parity_codes the_parity = parity_codes::EVEN_PARITY,
-	  stop_bit_codes the_stop_bits = stop_bit_codes::ONE_STOP_BIT,
-	  mode_codes mode = mode_codes::FULL_DUPLEX
+	  stop_bit_codes the_stop_bits = stop_bit_codes::ONE_STOP_BIT
 	) 
 	{
-	  if(mode==mode_codes::INVALID_MODE)
-	    return return_codes::BAD_MODE;
-
+	  _mode_=mode_codes::INVALID_MODE;
+	  
 	  if(rx_pin>=NUM_DIGITAL_PINS)
 	    return return_codes::BAD_RX_PIN;
 
 	  if(tx_pin>=NUM_DIGITAL_PINS)
 	    return return_codes::BAD_TX_PIN;
-
-	  if(
-	      (mode!=mode_codes::FULL_DUPLEX) &&
-	      (rx_pin!=tx_pin)
-	  ) return return_codes::BAD_HALF_DUPLEX_PIN;
 
 	  return_codes ret_code=
 	    _ctx_.config(
@@ -253,31 +245,64 @@ namespace arduino_due
 	    ); 
 
 	  if(ret_code!=return_codes::EVERYTHING_OK) return ret_code;
+	  	      
+	  // cofigure tx pin
+	  pinMode(tx_pin,OUTPUT);
+	  digitalWrite(tx_pin,HIGH);
 
-	  switch(mode)
+	  // configure & attatch interrupt on rx pin
+	  pinMode(rx_pin,INPUT);
+	  attachInterrupt(rx_pin,uart::rx_interrupt,CHANGE);
+
+	  _ctx_.enable_rx_interrupts(); 
+	  _mode_=mode_codes::FULL_DUPLEX;
+
+	  return return_codes::EVERYTHING_OK;
+	}
+	
+        return_codes half_duplex_config(
+	  uint32_t rx_tx_pin = default_pins::DEFAULT_RX_PIN,
+	  uint32_t bit_rate = bit_rates::DEFAULT_BIT_RATE,
+	  data_bit_codes the_data_bits = data_bit_codes::EIGHT_BITS,
+	  parity_codes the_parity = parity_codes::EVEN_PARITY,
+	  stop_bit_codes the_stop_bits = stop_bit_codes::ONE_STOP_BIT,
+	  bool in_rx_mode = true
+	) 
+	{
+	  _mode_=mode_codes::INVALID_MODE;
+
+	  if(rx_tx_pin>=NUM_DIGITAL_PINS)
+	    return return_codes::BAD_HALF_DUPLEX_PIN;
+
+	  return_codes ret_code=
+	    _ctx_.config(
+	      TIMER,
+	      rx_tx_pin,
+	      rx_tx_pin,
+	      bit_rate,
+	      the_data_bits,
+	      the_parity,
+	      the_stop_bits
+	    ); 
+
+	  if(ret_code!=return_codes::EVERYTHING_OK) return ret_code;
+
+	  if(in_rx_mode)
 	  {
-	    case mode_codes::FULL_DUPLEX:
-	      
-	      // cofigure tx pin
-	      pinMode(tx_pin,OUTPUT);
-	      digitalWrite(tx_pin,HIGH);
+	    // configure & attatch interrupt on rx pin
+	    pinMode(rx_tx_pin,INPUT);
+	    attachInterrupt(rx_tx_pin,uart::rx_interrupt,CHANGE);
 
-	    case mode_codes::RX_MODE:
-	      
-	      // configure & attatch interrupt on rx pin
-	      pinMode(rx_pin,INPUT);
-	      attachInterrupt(rx_pin,uart::rx_interrupt,CHANGE);
-
-	      _ctx_.enable_rx_interrupts(); 
-	      break;
-
-	    case mode_codes::TX_MODE:
-	      // cofigure tx pin
-	      pinMode(tx_pin,OUTPUT);
-	      digitalWrite(tx_pin,HIGH);
+	    _ctx_.enable_rx_interrupts(); 
+	    _mode_=mode_codes::RX_MODE;
+	  }
+	  else
+	  {
+	    // cofigure tx pin
+	    pinMode(rx_tx_pin,OUTPUT);
+	    digitalWrite(rx_tx_pin,HIGH);
 	  }
 
-	  _mode_=mode;
 	  return return_codes::EVERYTHING_OK;
 	}
 
@@ -632,19 +657,13 @@ namespace arduino_due
 	  );
 	}
 
-	// NOTE: on function begin() the last function argument
-	// is the operation mode: FULL_DUPLEX (default mode),
-	// RX_MODE and TX_MODE, these last two for half-duplex 
-	// mode of operation. When in half-duplex rx_pin and
-	// and tx_pin should be same 
 	void begin(
 	  uint32_t rx_pin = default_pins::DEFAULT_RX_PIN,
 	  uint32_t tx_pin = default_pins::DEFAULT_TX_PIN,
 	  uint32_t bit_rate = bit_rates::DEFAULT_BIT_RATE,
 	  data_bit_codes the_data_bits = data_bit_codes::EIGHT_BITS,
 	  parity_codes the_parity = parity_codes::NO_PARITY,
-	  stop_bit_codes the_stop_bits = stop_bit_codes::ONE_STOP_BIT,
-	  mode_codes mode = mode_codes::FULL_DUPLEX
+	  stop_bit_codes the_stop_bits = stop_bit_codes::ONE_STOP_BIT
 	)
 	{
 	  _tc_uart_.config(
@@ -653,8 +672,30 @@ namespace arduino_due
 	    bit_rate,
 	    the_data_bits,
 	    the_parity,
+	    the_stop_bits
+	  );
+	}
+
+	// NOTE: on function half_duplex_begin() the last function 
+	// argument specifies the operation mode: true (RX_MODE, 
+	// reception mode, the default) or false (TX_MODE, trans-
+	// mission mode)
+	return_codes half_duplex_begin(
+	  uint32_t rx_tx_pin = default_pins::DEFAULT_RX_PIN,
+	  uint32_t bit_rate = bit_rates::DEFAULT_BIT_RATE,
+	  data_bit_codes the_data_bits = data_bit_codes::EIGHT_BITS,
+	  parity_codes the_parity = parity_codes::NO_PARITY,
+	  stop_bit_codes the_stop_bits = stop_bit_codes::ONE_STOP_BIT,
+	  bool in_rx_mode = true
+	)
+	{
+	  return _tc_uart_.half_duplex_config(
+	    rx_tx_pin,
+	    bit_rate,
+	    the_data_bits,
+	    the_parity,
 	    the_stop_bits,
-	    mode
+	    in_rx_mode
 	  );
 	}
 
