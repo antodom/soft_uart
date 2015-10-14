@@ -292,7 +292,6 @@ namespace arduino_due
 	    // configure & attatch interrupt on rx pin
 	    pinMode(rx_tx_pin,INPUT);
 	    attachInterrupt(rx_tx_pin,uart::rx_interrupt,CHANGE);
-
 	    _ctx_.enable_rx_interrupts(); 
 	    _mode_=mode_codes::RX_MODE;
 	  }
@@ -301,6 +300,7 @@ namespace arduino_due
 	    // cofigure tx pin
 	    pinMode(rx_tx_pin,OUTPUT);
 	    digitalWrite(rx_tx_pin,HIGH);
+	    _mode_=mode_codes::TX_MODE;
 	  }
 
 	  return return_codes::EVERYTHING_OK;
