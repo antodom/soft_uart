@@ -105,7 +105,7 @@ In this section we would like to enumerate users using the library in their own 
 
 The list of users/projects goes now:
 
-1. **Project:** Autonomous sailboat A-Tirma (<http://velerorobot.blogspot.com.es>). **User**: División de Robótica y Oceanografía Computacional (<http://www.roc.siani.es>). **Description**: The library was development for this project. The onboard system is bases on an Arduino DUE, and we ran out of hardware serial ports.
+1. **Project:** Autonomous sailboat A-Tirma (<http://velerorobot.blogspot.com.es>). **User**: División de Robótica y Oceanografía Computacional (<http://www.roc.siani.es>). **Description**: The library was a specific development for this project. The sailboat onboard system is based on an Arduino DUE, and we ran out of hardware serial ports for all the hardware we use on the boat.
 
 
 
