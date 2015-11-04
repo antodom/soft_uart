@@ -107,5 +107,24 @@ The list of users/projects goes now:
 
 1. **Project:** Autonomous sailboat A-Tirma (<http://velerorobot.blogspot.com.es>). **User**: División de Robótica y Oceanografía Computacional (<http://www.roc.siani.es>). **Description**: The library was a specific development for this project. The sailboat onboard system is based on an Arduino DUE, and we ran out of hardware serial ports for all the hardware we use on the boat.
 
+### 7. Compiling with CMake
+
+For compiling on command line using CMake, just proceed in the following manner:
+
+1. Go to `soft_uart` directory (the one you have cloned with the progject).
+2. Create directory `build` (if not already created).
+3. Execute `cmake ..`.
+4. Set the following flags and variables (if not done before), you should execute `ccmake ..`:
+  * Set `PORT` to the serial port where the DUE's port you will use for uploading.
+  * Set `IS_NATIVE_PORT` to `true` (native port) or `false` (programming port) accordingly.
+5. Be sure the changes were applyed, usually running `cmake ..`.
+6. Compile executing `make`.
+7. The previous step has generated the examples available with the library. You can upload the code executing:
+  * `make upload_soft_uart_serial_test`, 
+  * `make upload_soft_uart_serial_test_auto`, 
+  * `make upload_soft_uart_serial_test_half_duplex` 
+  * and `make upload_soft_uart_serial_test_half_duplex_9O1`.
+
+
 
 

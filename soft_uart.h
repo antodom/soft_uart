@@ -321,7 +321,8 @@ namespace arduino_due
 	  pinMode(_ctx_.rx_pin,INPUT);
 	  attachInterrupt(_ctx_.rx_pin,uart::rx_interrupt,CHANGE);
 	  
-	  _mode_=mode_codes::RX_MODE; _ctx_.enable_rx_interrupts(); 
+	  _mode_=mode_codes::RX_MODE; 
+	  _ctx_.enable_rx_interrupts(); 
 	  return true;
 	}
 
@@ -334,10 +335,10 @@ namespace arduino_due
 
 	  if(_mode_==mode_codes::TX_MODE) return true; 
 
+	  while(_ctx_.rx_status!=rx_status_codes::LISTENING) 
+	  { /* nothing */ } 
+
 	  _ctx_.disable_rx_interrupts();
-	  while(
-	    _ctx_.rx_status!=rx_status_codes::LISTENING
-	  ) _ctx_.enable_rx_interrupts();
 
 	  detachInterrupt(_ctx_.rx_pin);
 	  pinMode(_ctx_.tx_pin,OUTPUT);
