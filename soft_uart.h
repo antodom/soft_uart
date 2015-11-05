@@ -50,7 +50,7 @@ void TC##id##_Handler(void) \
       static_cast<uint32_t>( \
         arduino_due::soft_uart::timer_ids::TIMER_TC##id \
       ) \
-    ].tc_p, \ 
+    ].tc_p, \
     arduino_due::soft_uart::tc_timer_table[ \
       static_cast<uint32_t>( \
         arduino_due::soft_uart::timer_ids::TIMER_TC##id \
@@ -365,7 +365,16 @@ namespace arduino_due
         uint32_t get_bit_rate() { return _ctx_.bit_rate; }
 
 	uint32_t get_rx_data(uint32_t& data) 
-	{ return _ctx_.get_rx_data(data); }
+	{ 
+	  return (
+	    (
+	      (_mode_==mode_codes::FULL_DUPLEX) ||
+	      (_mode_==mode_codes::RX_MODE)
+	    )? 
+	      _ctx_.get_rx_data(data): 
+	      rx_data_status_codes::NO_DATA_AVAILABLE
+	  );
+	}
 
 	bool data_available(uint32_t status)
 	{ return _ctx_.data_available(status); }
@@ -959,7 +968,7 @@ namespace arduino_due
 	  set_outgoing_bit();
 	  if((tx_bit_counter++)==tx_frame_bits-1) 
 	  {
-	    register uint32_t data_to_send;
+	    uint32_t data_to_send;
 	    if(tx_buffer.pop(data_to_send)) 
 	    { tx_data=data_to_send; tx_bit_counter=0; }
 	    else
@@ -1032,15 +1041,17 @@ namespace arduino_due
     {
       register uint32_t status;
       register bool not_empty;
-      register uint32_t data_received;
+      uint32_t data_received;
 
       disable_tc_interrupts();
+      
+      if(!(not_empty=rx_buffer.pop(data_received)))
+        rx_data_status=rx_data_status_codes::NO_DATA_AVAILABLE;
       status=rx_data_status;
-      not_empty=rx_buffer.pop(data_received);
+
       enable_tc_interrupts();
 
-      if(!not_empty) 
-	return rx_data_status_codes::NO_DATA_AVAILABLE;
+      if(!not_empty) return status;
       
       // checking start bit
       status=(
@@ -1097,7 +1108,7 @@ namespace arduino_due
     )
     {
       // setting the data to send
-      register uint32_t data_to_send=data&data_mask;
+      uint32_t data_to_send=data&data_mask;
      
       // setting the parity bit
       if(parity!=parity_codes::NO_PARITY)

@@ -99,32 +99,35 @@ In addition, it is also possible to know that some data have been lost on recept
 
 Any library using the interrupts associated with any of the timer/counter module channels TC0, TC1, TC2, TC3, TC4, TC5, TC6, TC7 and TC8, has a potential compatibility problem with soft_uart, if it happens to use the same TC module and the same channel. An example of this potential incompatibility is library Servo which uses by default TC0, TC2, TC3, TC4 y TC5 interrupt handlers. In this case, you will be limited to use serial_tc1, serial_tc6, serial_tc7 and/or serial_tc8 software serial objects to preserve the compatibility. Another option could also be to change the Servo library to use less TC modules.
 
-### 6. Library users
+### 6. Compiling with CMake
+
+For compiling on command line using CMake, just proceed in the following manner:
+
+1. Set the following environment variables (a good place to put them is on .bashrc):
+  * Set `ARDUINO_DUE_ROOT_PATH` to `~/.arduino15/packages/arduino/`.
+  * Set `ARDUINO_UNO_ROOT_PATH` to the path where you have installed the Arduino IDE, for example, `~/installations/arduino-1.6.5`.
+  * Set `ARDUINO_IDE_LIBRARY_PATH` to the path for the Arduino IDE projects you have in preferences. For example, `~/arduino_projects`.
+
+2. Go to `soft_uart` directory (the one you have cloned with the progject).
+3. Create directory `build` (if not already created).
+4. Execute `cmake ..`.
+5. Set the following flags and variables (if not done before), you should execute `ccmake ..`:
+  * Set `PORT` to the serial port you will use for uploading.
+  * Set `IS_NATIVE_PORT` to `true` (if using DUE's native port) or `false` (if using DUE's programming port).
+6. Be sure the changes were applied, usually running `cmake ..`.
+7. Compile executing `make`.
+8. The previous step has generated the examples available with the library. You can upload the code executing:
+  * `make upload_soft_uart_serial_test`, 
+  * `make upload_soft_uart_serial_test_auto`, 
+  * `make upload_soft_uart_serial_test_half_duplex` 
+  * and `make upload_soft_uart_serial_test_half_duplex_9O1`.
+
+### 7. Library users
 
 In this section we would like to enumerate users using the library in their own projects and developments. So please, if your are using the library, drop us an email indicating in what project or development you are using it.
 
 The list of users/projects goes now:
 
 1. **Project:** Autonomous sailboat A-Tirma (<http://velerorobot.blogspot.com.es>). **User**: División de Robótica y Oceanografía Computacional (<http://www.roc.siani.es>). **Description**: The library was a specific development for this project. The sailboat onboard system is based on an Arduino DUE, and we ran out of hardware serial ports for all the hardware we use on the boat.
-
-### 7. Compiling with CMake
-
-For compiling on command line using CMake, just proceed in the following manner:
-
-1. Go to `soft_uart` directory (the one you have cloned with the progject).
-2. Create directory `build` (if not already created).
-3. Execute `cmake ..`.
-4. Set the following flags and variables (if not done before), you should execute `ccmake ..`:
-  * Set `PORT` to the serial port where the DUE's port you will use for uploading.
-  * Set `IS_NATIVE_PORT` to `true` (native port) or `false` (programming port) accordingly.
-5. Be sure the changes were applyed, usually running `cmake ..`.
-6. Compile executing `make`.
-7. The previous step has generated the examples available with the library. You can upload the code executing:
-  * `make upload_soft_uart_serial_test`, 
-  * `make upload_soft_uart_serial_test_auto`, 
-  * `make upload_soft_uart_serial_test_half_duplex` 
-  * and `make upload_soft_uart_serial_test_half_duplex_9O1`.
-
-
 
 

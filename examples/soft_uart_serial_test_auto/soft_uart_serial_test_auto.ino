@@ -38,7 +38,7 @@ using namespace arduino_due;
 
 #define RX_PIN 10 // software serial port's reception pin
 #define TX_PIN 11 // software serial port's transmision pin
-#define SOFT_UART_BIT_RATE 9600 // 3840057600 38400 1200 19200 9600 115200 115200
+#define SOFT_UART_BIT_RATE 9600 // 38400 57600 38400 1200 19200 9600 115200
 #define RX_BUF_LENGTH 256 // software serial port's reception buffer length
 #define TX_BUF_LENGTH 256 // software serial port's transmision buffer length
 
