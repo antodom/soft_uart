@@ -63,7 +63,7 @@ Example *soft_uart_serial_test.ino* is a version of the previous one but with er
 
 Example *soft_uart_serial_test_auto.ino* illustrates how to use a serial port object with itself, in this case serial_tc4, like in the previous example. In addition, the example uses also a serial mode of 9 bit length which is not possible with the current Arduino standard library. 
 
-Example *soft_uart_serial_test_half_duplex* uses two software serial objects (serial_tc0 and serial_tc1) both in half duplex mode to communicate each other. Example *soft_uart_serial_test_half_duples_char* is another example using half duplex mode but just sending one byte (char) each time. And example *soft_uart_serial_test_half_duplex_9O2* shows how to use the same objects using a data length of nine bits, odd parity and two stop bits, and similarly to the former one sending one data each time.
+Example *soft_uart_serial_test_half_duplex* uses two software serial objects (serial_tc0 and serial_tc1) both in half duplex mode to communicate each other. Example *soft_uart_serial_test_half_duplex_char* is another example using half duplex mode but just sending one byte (char) each time. And example *soft_uart_serial_test_half_duplex_9O2* shows how to use the same objects using a data length of nine bits, odd parity and two stop bits, and similarly to the former one sending one data each time.
 
 ### 4. Reception errors
 
@@ -121,7 +121,8 @@ For compiling on command line using CMake, just proceed in the following manner:
 8. The previous step has generated the examples available with the library. You can upload the code executing:
   * `make upload_soft_uart_serial_test`, 
   * `make upload_soft_uart_serial_test_auto`, 
-  * `make upload_soft_uart_serial_test_half_duplex` 
+  * `make upload_soft_uart_serial_test_half_duplex`,
+  * `make upload_soft_uart_serial_test_half_duplex_char`
   * and `make upload_soft_uart_serial_test_half_duplex_9O1`.
 
 ### 7. Library users
