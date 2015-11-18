@@ -50,7 +50,7 @@ void TC##id##_Handler(void) \
       static_cast<uint32_t>( \
         arduino_due::soft_uart::timer_ids::TIMER_TC##id \
       ) \
-    ].tc_p, \ 
+    ].tc_p, \
     arduino_due::soft_uart::tc_timer_table[ \
       static_cast<uint32_t>( \
         arduino_due::soft_uart::timer_ids::TIMER_TC##id \
@@ -371,7 +371,16 @@ namespace arduino_due
         double get_frame_time() { return _ctx_.frame_time; }	
 
 	uint32_t get_rx_data(uint32_t& data) 
-	{ return _ctx_.get_rx_data(data); }
+	{ 
+	  return (
+	    (
+	      (_mode_==mode_codes::FULL_DUPLEX) ||
+	      (_mode_==mode_codes::RX_MODE)
+	    )? 
+	      _ctx_.get_rx_data(data): 
+	      rx_data_status_codes::NO_DATA_AVAILABLE
+	  );
+	}
 
 	bool data_available(uint32_t status)
 	{ return _ctx_.data_available(status); }
@@ -1045,15 +1054,17 @@ namespace arduino_due
     {
       register uint32_t status;
       register bool not_empty;
-      register uint32_t data_received;
+      uint32_t data_received;
 
       disable_tc_interrupts();
+      
+      if(!(not_empty=rx_buffer.pop(data_received)))
+        rx_data_status=rx_data_status_codes::NO_DATA_AVAILABLE;
       status=rx_data_status;
-      not_empty=rx_buffer.pop(data_received);
+
       enable_tc_interrupts();
 
-      if(!not_empty) 
-	return rx_data_status_codes::NO_DATA_AVAILABLE;
+      if(!not_empty) return status;
       
       // checking start bit
       status=(
