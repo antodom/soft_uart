@@ -47,6 +47,10 @@ By default, the serial objects work in full-duplex using two pins, namely, a RX 
 
 The  library  is  available  through  an  open	git  repository  available   at:
 
+* <https://github.com/antodom/soft_uart>
+
+and also at our own mirror at:
+
 * <http://bizet.dis.ulpgc.es/antodom/soft_uart>
 
 For using it you just have to copy the library on the libraries folder used by your Arduino IDE, the folder should be named "soft_uart".
