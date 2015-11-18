@@ -40,15 +40,47 @@ using namespace arduino_due;
 
 #define RX_PIN 10 // software serial port's reception pin
 #define TX_PIN 11 // software serial port's transmision pin
-#define SOFT_UART_BIT_RATE 38400 // 57600 38400 1200 19200 9600 115200 115200
+#define SOFT_UART_BIT_RATE 57600 // 57600 38400 1200 19200 9600 115200 300
 #define RX_BUF_LENGTH 256 // software serial port's reception buffer length
 #define TX_BUF_LENGTH 256 // software serial port's transmision buffer length
+#define RECEPTION_TIMEOUT 100 // milliseconds
 
 uint32_t counter=0;
 
 // declaration of software serial port object serial_tc4
 // which uses timer/counter channel TC4
 serial_tc4_declaration(RX_BUF_LENGTH,TX_BUF_LENGTH);
+
+template<typename serial_tc_t>
+void receive_tc(serial_tc_t& serial_tc,unsigned long timeout)
+{
+  Serial.print("<-- [serial_tc"); 
+  Serial.print(static_cast<int>(serial_tc.get_timer())); 
+  Serial.print("] received: ");
+  
+  int data=0; 
+  unsigned long last_time=millis();
+  do
+  {
+    if(serial_tc.available()) 
+    {
+      if( ((data=serial_tc.read())<0) && serial_tc.bad_status() )
+      {
+	last_time=millis();
+        Serial.print("||");
+        if(serial_tc.bad_start_bit()) Serial.print("[BAD_START_BIT]");
+        if(serial_tc.bad_parity()) Serial.print("[BAD_PARITY]");
+        if(serial_tc.bad_stop_bit()) Serial.print("[BAD_STOP_BIT]");
+        Serial.println("||");
+      }
+      else 
+      { 
+	last_time=millis(); 
+	Serial.print(static_cast<char>(data)); 
+      }
+    }
+  } while( (millis()-last_time<timeout) && (data!=0xa) );
+}
 
 void setup() {
   // put your setup code here, to run once:
@@ -84,51 +116,25 @@ void loop() {
 
   Serial.print("--> [Serial2] sending: "); Serial.println(counter);
   Serial2.println(counter);
-  
-  Serial.print("<-- [serial_tc4] received: ");
-  int data=0;
-  do
-  {  
-    if(serial_tc4.available()) 
-    {
-      data=serial_tc4.read();
-      if(data>0) 
-      {
-        Serial.print(static_cast<char>(data));
-        //while(!serial_tc4.print(static_cast<char>(data))) { /* nothing */ }
-      }
-      else if(serial_tc4.bad_status())
-      {
-	// when serial_tc4.read() is negative, it means that there is no data
-	// available or that the last data received was erroneous (this is
-	// what we check with serial_tc4.bad_status(). If the last data was
-	// erroneus we can check the reason with member functions bad_start_bit(),
-	// bad_parity() and bad_stop_bit()
-        Serial.print("||");
-        if(serial_tc4.bad_start_bit()) Serial.print("[BAD_START_BIT]");
-        if(serial_tc4.bad_parity()) Serial.print("[BAD_PARITY]");
-        if(serial_tc4.bad_stop_bit()) Serial.print("[BAD_STOP_BIT]");
-        Serial.print("||");
-      }
-    }
-  } while(!serial_tc4.bad_status() && (data!=0xA));
-  
+
+  unsigned long timeout=
+    static_cast<unsigned long>(2*1000*serial_tc4.get_frame_time());
+  if(timeout<RECEPTION_TIMEOUT) timeout=RECEPTION_TIMEOUT;
+  receive_tc(serial_tc4,timeout);
+ 
   Serial.println("--------------------------------------------------------");
   Serial.println("--------------------------------------------------------");
   
   Serial.print("--> [serial_tc4] sending: "); Serial.println(counter);
   serial_tc4.println(counter);
-  
+
   Serial.print("<-- [Serial2] received: ");
+  int data=0;
   do
   {  
-    if(Serial2.available()) 
-    {
-      data=Serial2.read();
-      if(data>0) 
-        Serial.print(static_cast<char>(data));
-    }
-  } while((data>0) && (data!=0xA));  
+    if( Serial2.available() && ((data=Serial2.read())>=0) ) 
+      Serial.print(static_cast<char>(data));
+  } while((data>=0) && (data!=0xa));  
   
   counter++;
 }

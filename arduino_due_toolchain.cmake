@@ -64,18 +64,18 @@ find_due_program(
 find_due_program(
   DUE_BOSSAC 
   bossac
-  $ENV{ARDUINO_DUE_ROOT_PATH}/tools/bossac/1.3a-arduino
+  $ENV{ARDUINO_DUE_ROOT_PATH}/tools/bossac/1.6.1-arduino
 )
 
 CMAKE_FORCE_C_COMPILER(${DUE_CC} arduino_due_arm)
 CMAKE_FORCE_CXX_COMPILER(${DUE_CXX} arduino_due_arm)
 
 include_directories(
-  $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.4/system/libsam
-  $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.4/system/CMSIS/CMSIS/Include
-  $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.4/system/CMSIS/Device/ATMEL $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.4/cores/arduino 
-  $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.4/cores/arduino/USB
-  $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.4/variants/arduino_due_x
+  $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.6/system/libsam
+  $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.6/system/CMSIS/CMSIS/Include
+  $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.6/system/CMSIS/Device/ATMEL $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.6/cores/arduino 
+  $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.6/cores/arduino/USB
+  $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.6/variants/arduino_due_x
 )
 
 

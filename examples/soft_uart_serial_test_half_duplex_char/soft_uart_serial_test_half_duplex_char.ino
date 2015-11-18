@@ -23,10 +23,10 @@
  ** If not, see: <http://www.gnu.org/licenses/>.
  **/
 /*
- * File: soft_uart_serial_test_half_duplex_902.ino 
+ * File: soft_uart_serial_test_half_duplex_char.ino 
  * Description: This is an example illustrating the use of  the soft_uart
  * library. In this case, the example two software serial objects to show
- * how to use them in half duplex mode sending one 9-bit data each time
+ * how to use them in half duplex mode sending one char each time
  * Date: October 12th, 2015
  * Author: Antonio C. Dominguez-Brito <adominguez@iusiani.ulpgc.es>
  * ROC-SIANI - Universidad de Las Palmas de Gran Canaria - Spain
@@ -38,13 +38,13 @@ using namespace arduino_due;
 
 #define SERIAL_TC0_PIN 10 // TC0 software serial port's half duplex pin
 #define SERIAL_TC1_PIN 11 // TC1 software serial port's half duplex pin
-#define SOFT_UART_BIT_RATE 38400 // 38400 57600 38400 1200 19200 9600 115200 115200 75
+#define SOFT_UART_BIT_RATE 57600 // 38400 57600 38400 1200 19200 9600 115200 115200 75
 #define RX_BUF_LENGTH 256 // software serial port's reception buffer length
 #define TX_BUF_LENGTH 256 // software serial port's transmision buffer length
 #define TX_INACTIVE_TIME 50 // milliseconds
 #define RECEPTION_TIMEOUT 100 // milliseconds
 
-uint32_t counter=0;
+uint8_t counter=0;
 
 // declaration of software serial port object serial_tc0
 // which uses timer/counter channel TC0
@@ -97,17 +97,17 @@ void setup() {
     serial_tc0.half_duplex_begin(
     SERIAL_TC0_PIN, 
     SOFT_UART_BIT_RATE,
-    soft_uart::data_bit_codes::NINE_BITS,
-    soft_uart::parity_codes::ODD_PARITY,
-    soft_uart::stop_bit_codes::TWO_STOP_BITS,
+    soft_uart::data_bit_codes::EIGHT_BITS,
+    soft_uart::parity_codes::EVEN_PARITY,
+    soft_uart::stop_bit_codes::ONE_STOP_BIT,
     false // on transmission mode (the default is on reception mode) 
   );
   serial_tc1.half_duplex_begin(
     SERIAL_TC1_PIN, 
     SOFT_UART_BIT_RATE,
-    soft_uart::data_bit_codes::NINE_BITS,
-    soft_uart::parity_codes::ODD_PARITY,
-    soft_uart::stop_bit_codes::TWO_STOP_BITS
+    soft_uart::data_bit_codes::EIGHT_BITS,
+    soft_uart::parity_codes::EVEN_PARITY,
+    soft_uart::stop_bit_codes::ONE_STOP_BIT
     // initially on reception mode, last argument is true by default
   );   
   Serial.println("========================================================");
@@ -121,9 +121,6 @@ void loop() {
   Serial.println("********************************************************");  
 
   Serial.print("--> [serial_tc0] sending: "); Serial.println(counter);
-  // IMPORTANT: for sending 9-bit values you should send each value separately 
-  // using function write(uint32_t). Using functions print or println, or alike
-  // function will truncate each data to be send to 8 bits.
   serial_tc0.write(counter);
 
   unsigned long timeout=
@@ -139,11 +136,9 @@ void loop() {
   // set_rx_mode() implicitly flushes the tx buffer before getting into rx mode
   serial_tc1.set_tx_mode(); 
   serial_tc0.set_rx_mode();
+  //serial_tc1.set_tx_mode(); 
 
   Serial.print("--> [serial_tc1] sending: "); Serial.println(counter);
-  // IMPORTANT: for sending 9-bit values you should send each value separately 
-  // using function write(uint32_t). Using functions print or println, or alike
-  // function will truncate each data to be send to 8 bits.
   serial_tc1.write(counter);
   
   timeout=
@@ -155,7 +150,8 @@ void loop() {
   // set_rx_mode() implicitly flushes the tx buffer before getting into rx mode
   serial_tc0.set_tx_mode();
   serial_tc1.set_rx_mode();
+  //serial_tc0.set_tx_mode();
   
-  counter=(counter+1)%(1<<static_cast<int>(soft_uart::data_bit_codes::NINE_BITS));
+  counter=(counter+1)%(1<<static_cast<uint8_t>(soft_uart::data_bit_codes::EIGHT_BITS));
 }
 

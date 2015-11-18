@@ -38,9 +38,10 @@ using namespace arduino_due;
 
 #define SERIAL_TC0_PIN 10 // TC0 software serial port's half duplex pin
 #define SERIAL_TC1_PIN 11 // TC1 software serial port's half duplex pin
-#define SOFT_UART_BIT_RATE 57600 // 38400 57600 38400 1200 19200 9600 115200 115200
+#define SOFT_UART_BIT_RATE 38400 // 38400 57600 38400 1200 19200 9600 115200 
 #define RX_BUF_LENGTH 256 // software serial port's reception buffer length
 #define TX_BUF_LENGTH 256 // software serial port's transmision buffer length
+#define RECEPTION_TIMEOUT 100 // milliseconds
 
 uint32_t counter=0;
 
@@ -51,6 +52,36 @@ serial_tc0_declaration(RX_BUF_LENGTH,TX_BUF_LENGTH);
 // declaration of software serial port object serial_tc1
 // which uses timer/counter channel TC1
 serial_tc1_declaration(RX_BUF_LENGTH,TX_BUF_LENGTH);
+
+template<typename serial_tc_t>
+void receive_tc(serial_tc_t& serial_tc, unsigned long timeout)
+{
+  Serial.print("<-- [serial_tc"); 
+  Serial.print(static_cast<int>(serial_tc.get_timer())); 
+  Serial.print("] received: ");
+  
+  int data=0; 
+  unsigned long last_time=millis();
+  do
+  {
+    if(serial_tc.available()) 
+    {
+      if( ((data=serial_tc.read())<0) && serial_tc.bad_status() )
+      {
+	last_time=millis();
+        Serial.print("||");
+	if(serial_tc.bad_start_bit()) Serial.print("[BAD_START_BIT]");
+        if(serial_tc.bad_parity()) Serial.print("[BAD_PARITY]");
+        if(serial_tc.bad_stop_bit()) Serial.print("[BAD_STOP_BIT]");
+	Serial.print((serial_tc.get_last_data_status()>>16),BIN);
+        Serial.print("||");
+      }
+      else 
+      { last_time=millis(); Serial.print(static_cast<char>(data)); }
+    }
+  }
+  while(millis()-last_time<timeout); 
+}
 
 void setup() {
   // put your setup code here, to run once:
@@ -90,32 +121,10 @@ void loop() {
   Serial.print("--> [serial_tc0] sending: "); Serial.println(counter);
   serial_tc0.println(counter);
   
-  Serial.print("<-- [serial_tc1] received: ");
-  int data=0; 
-  do
-  {  
-    if(serial_tc1.available()) 
-    {
-      data=serial_tc1.read();
-      if(data>0) 
-      {
-        Serial.print(static_cast<char>(data));
-      }
-      else if(serial_tc1.bad_status())
-      {
-  // when serial_tc1.read() is negative, it means that there is no data
-  // available or that the last data received was erroneous (this is
-  // what we check with serial_tc4.bad_status(). If the last data was
-  // erroneus we can check the reason with member functions bad_start_bit(),
-  // bad_parity() and bad_stop_bit()
-        Serial.print("||");
-        if(serial_tc1.bad_start_bit()) Serial.print("[BAD_START_BIT]");
-        if(serial_tc1.bad_parity()) Serial.print("[BAD_PARITY]");
-        if(serial_tc1.bad_stop_bit()) Serial.print("[BAD_STOP_BIT]");
-        Serial.print("||");
-      }
-    }
-  } while(!serial_tc1.bad_status() && (data!=0xA));
+  unsigned long timeout=
+    static_cast<unsigned long>(2*1000*serial_tc1.get_frame_time());
+  if(timeout<RECEPTION_TIMEOUT) timeout=RECEPTION_TIMEOUT;
+  receive_tc(serial_tc1,timeout);
 
   Serial.println("--------------------------------------------------------");
   Serial.println("--------------------------------------------------------");  
@@ -123,42 +132,22 @@ void loop() {
   // sending data on the opposite direction
   // changing half-duplex modes for both software serial objects
   // set_rx_mode() implicitly flushes the tx buffer before getting into rx mode
-  serial_tc0.set_rx_mode();
   serial_tc1.set_tx_mode();
+  serial_tc0.set_rx_mode();
 
   Serial.print("--> [serial_tc1] sending: "); Serial.println(counter);
   serial_tc1.println(counter);
+
+  timeout=
+    static_cast<unsigned long>(2*1000*serial_tc0.get_frame_time());
+  if(timeout<RECEPTION_TIMEOUT) timeout=RECEPTION_TIMEOUT;
+  receive_tc(serial_tc0,timeout);
   
-  Serial.print("<-- [serial_tc0] received: ");
-  do
-  {  
-    if(serial_tc0.available()) 
-    {
-      data=serial_tc0.read();
-      if(data>0) 
-      {
-        Serial.print(static_cast<char>(data));
-      }
-      else if(serial_tc0.bad_status())
-      {
-  // when serial_tc0.read() is negative, it means that there is no data
-  // available or that the last data received was erroneous (this is
-  // what we check with serial_tc4.bad_status(). If the last data was
-  // erroneus we can check the reason with member functions bad_start_bit(),
-  // bad_parity() and bad_stop_bit()
-        Serial.print("||");
-        if(serial_tc0.bad_start_bit()) Serial.print("[BAD_START_BIT]");
-        if(serial_tc0.bad_parity()) Serial.print("[BAD_PARITY]");
-        if(serial_tc0.bad_stop_bit()) Serial.print("[BAD_STOP_BIT]");
-        Serial.print("||");
-      }
-    }
-  } while(!serial_tc0.bad_status() && (data!=0xA));
-  
+ 
   // changing half-duplex modes for both software serial objects
   // set_rx_mode() implicitly flushes the tx buffer before getting into rx mode
-  serial_tc1.set_rx_mode();
   serial_tc0.set_tx_mode();
+  serial_tc1.set_rx_mode();
 
   counter++;
 }

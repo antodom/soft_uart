@@ -38,15 +38,43 @@ using namespace arduino_due;
 
 #define RX_PIN 10 // software serial port's reception pin
 #define TX_PIN 11 // software serial port's transmision pin
-#define SOFT_UART_BIT_RATE 9600 // 3840057600 38400 1200 19200 9600 115200 115200
+#define SOFT_UART_BIT_RATE 57600 // 57600 38400 1200 19200 9600 115200 115200
 #define RX_BUF_LENGTH 256 // software serial port's reception buffer length
 #define TX_BUF_LENGTH 256 // software serial port's transmision buffer length
+#define RECEPTION_TIMEOUT 100 // milliseconds
 
 uint32_t counter=0;
 
 // declaration of software serial port object serial_tc4
 // which uses timer/counter channel TC4
 serial_tc4_declaration(RX_BUF_LENGTH,TX_BUF_LENGTH);
+
+template<typename serial_tc_t>
+void receive_tc(serial_tc_t& serial_tc, unsigned long timeout)
+{
+  Serial.print("<-- [serial_tc"); 
+  Serial.print(static_cast<int>(serial_tc.get_timer())); 
+  Serial.print("] received: ");
+  
+  int data=0; 
+  unsigned long last_time=millis();
+  
+  while(millis()-last_time<timeout)  
+  {
+    if(serial_tc.available()) 
+    {
+      if( ((data=serial_tc.read())<0) && serial_tc.bad_status() )
+      {
+        Serial.print("||");
+        if(serial_tc.bad_parity()) Serial.print("[BAD_PARITY]");
+        if(serial_tc.bad_stop_bit()) Serial.print("[BAD_STOP_BIT]");
+        Serial.println("||");
+	break;
+      }
+      else { Serial.println(data,DEC); break; }
+    }
+  }
+}
 
 void setup() {
   // put your setup code here, to run once:
@@ -84,31 +112,12 @@ void loop() {
   // using function write(uint32_t). Using functions print or println, or alike
   // function will truncate each data to be send to 8 bits.
   serial_tc4.write(counter);
-  
-  Serial.print("<-- [serial_tc4] received: ");
-  int data=0; 
-  if(serial_tc4.available()) 
-  {
-    data=serial_tc4.read();
-    if(data>=0) 
-    {
-      Serial.println(data,DEC);
-    }
-    else if(serial_tc4.bad_status())
-    {
-      // when serial_tc4.read() is negative, it means that there is no data
-      // available or that the last data received was erroneous (this is
-      // what we check with serial_tc4.bad_status(). If the last data was
-      // erroneus we can check the reason with member functions bad_start_bit(),
-      // bad_parity() and bad_stop_bit()
-      Serial.print("||");
-      if(serial_tc4.bad_start_bit()) Serial.print("[BAD_START_BIT]");
-      if(serial_tc4.bad_parity()) Serial.print("[BAD_PARITY]");
-      if(serial_tc4.bad_stop_bit()) Serial.print("[BAD_STOP_BIT]");
-      Serial.println("||");
-    }
-  }
-  
+
+  unsigned long timeout=
+    static_cast<unsigned long>(2*1000*serial_tc4.get_frame_time());
+  if(timeout<RECEPTION_TIMEOUT) timeout=RECEPTION_TIMEOUT;
+  receive_tc(serial_tc4,timeout);
+ 
   counter=(counter+1)%(1<<static_cast<int>(soft_uart::data_bit_codes::NINE_BITS));
 }
 

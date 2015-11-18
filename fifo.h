@@ -80,7 +80,7 @@ namespace arduino_due
       void _init_() { _first_=_last_=-1; _items_=0; }
 
       // push implementation for a normal fifo
-      // when is full, we can not push any more element 
+      // when is full, we can not push any further element 
       bool _push_(const T& t,bool_to_type<false>)
       {
 	int new_last=(_last_+1)%LENGTH;
@@ -107,7 +107,7 @@ namespace arduino_due
 	if(new_last==_first_) // full?
 	{
 	  // NOTE: when the fifo is circular and the fifo is full
-	  // the new element overwrite the first one 
+	  // the new element overwrites the first one 
 	  _first_=(_first_+1)%LENGTH;
 	  _last_=new_last; _buffer_p_[_last_]=t;
 	  return false;
