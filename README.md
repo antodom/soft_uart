@@ -123,6 +123,7 @@ For compiling on command line using CMake, just proceed in the following manner:
 6. Be sure the changes were applied, usually running `cmake ..`.
 7. Compile executing `make`.
 8. The previous step has generated the examples available with the library. You can upload the code executing:
+  * `make upload_basic_test`, 
   * `make upload_soft_uart_serial_test`, 
   * `make upload_soft_uart_serial_test_auto`, 
   * `make upload_soft_uart_serial_test_half_duplex`,
