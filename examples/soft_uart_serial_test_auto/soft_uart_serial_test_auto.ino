@@ -63,15 +63,20 @@ void receive_tc(serial_tc_t& serial_tc, unsigned long timeout)
   {
     if(serial_tc.available()) 
     {
-      if( ((data=serial_tc.read())<0) && serial_tc.bad_status() )
+      if((data=serial_tc.read())>=0)
+      { Serial.println(data,DEC); break; }
+      else
       {
-        Serial.print("||");
-        if(serial_tc.bad_parity()) Serial.print("[BAD_PARITY]");
-        if(serial_tc.bad_stop_bit()) Serial.print("[BAD_STOP_BIT]");
-        Serial.println("||");
-	break;
+	if(serial_tc.bad_status())
+	{
+	  Serial.print("||");
+          if(serial_tc.bad_start_bit()) Serial.print("[BAD_START_BIT]");
+	  if(serial_tc.bad_parity()) Serial.print("[BAD_PARITY]");
+	  if(serial_tc.bad_stop_bit()) Serial.print("[BAD_STOP_BIT]");
+	  Serial.println("||");
+	  break;
+	}
       }
-      else { Serial.println(data,DEC); break; }
     }
   }
 }
