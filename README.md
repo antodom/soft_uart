@@ -71,15 +71,15 @@ Example *soft_uart_serial_test_half_duplex* uses two software serial objects (se
 
 ### 4. Reception errors
 
-The behavior of the software serial objects provided by soft_uart will depend on the load of interrupts per unit of time of the application where you integrate them. Also on the peaks of interrupts in a given moment. Using the example provided I have reached to 57600 (and two stop bits) without errors. Evidently it is an example where there is no a great use of interrupts, except the ones used by the software serial object serial_tc4, and hardware serial objects Serial and Serial2. I advise you to check first for the best bit rate your application can manage without errors.
+The behavior of the software serial objects provided by soft_uart will depend on the load of interrupts per unit of time of the application where you integrate them. Also on the peaks of interrupts in a given moment. Using the examples provided I have reached to 57600 (and two stop bits) without errors. Evidently those are examples where there is no a great use of interrupts, except the ones used by the software serial objects, and the hardware serial objects involved specifically on each example. I advise you to check first for the best bit rate your application can manage without errors.
 
-Independently of the application where you use this library, what is important is to know when any data have been received incorrectly. Thus, this library allows you to know the reception status of the last received byte. In general, for any received byte using member function read() you should check if read() returns -1 or not. When it returns -1, it may be due to that there is no available data, or on the contrary, the data received have an error. The next code illustrates how to proceed using serial_tc4 software serial object to find out the status of the last data received in those situations.
+Independently of the application where you use this library, what is important is to know when any data have been received incorrectly. Thus, this library allows you to know the reception status of the last received data. In general, for any received data using member function read(), you should check if read() returns -1 or not. When it returns -1, it may be due to that there is no available data, or on the contrary, the data received has an error. As an example, the next code illustrates how to proceed using serial_tc4 software serial object to find out the status of the last data received in those situations.
 
 ```
   if(serial_tc4.available()) 
   {
     int data=serial_tc4.read();
-    if(data>0) 
+    if(data>=0) 
     {
       // data received correctly
       Serial.print(static_cast<char>(data));
@@ -138,4 +138,6 @@ The list of users/projects goes now:
 
 1. **Project:** Autonomous sailboat A-Tirma (<http://velerorobot.blogspot.com.es>). **User**: División de Robótica y Oceanografía Computacional (<http://www.roc.siani.es>). **Description**: The library was a specific development for this project. The sailboat onboard system is based on an Arduino DUE, and we ran out of hardware serial ports for all the hardware we use on the boat.
 
+### 8. Feedback & Suggestions
 
+Please be free to send me any comment, doubt of use, or suggestion in relation to soft_uart.
