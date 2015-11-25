@@ -214,6 +214,8 @@ namespace arduino_due
       public:
 
         uart() { _mode_=mode_codes::INVALID_MODE; }
+
+	~uart() { end(); }
   
         uart(const uart&) = delete;
 	uart& operator=(const uart&) = delete;
@@ -237,7 +239,6 @@ namespace arduino_due
 
 	  return_codes ret_code=
 	    _ctx_.config(
-	      TIMER,
 	      rx_pin,
 	      tx_pin,
 	      bit_rate,
@@ -278,7 +279,6 @@ namespace arduino_due
 
 	  return_codes ret_code=
 	    _ctx_.config(
-	      TIMER,
 	      rx_tx_pin,
 	      rx_tx_pin,
 	      bit_rate,
@@ -422,7 +422,6 @@ namespace arduino_due
 	{
 
 	  return_codes config(
-	    timer_ids the_timer,
 	    uint32_t the_rx_pin,
 	    uint32_t the_tx_pin,
 	    uint32_t the_bit_rate,
@@ -598,7 +597,6 @@ namespace arduino_due
 	    else PIO_Clear(tx_pio_p,tx_mask);
 	  }
 
-	  timer_ids timer;
 	  tc_timer_data* timer_p;
 	  uint32_t rx_pin;
 	  Pio* rx_pio_p;
@@ -820,7 +818,6 @@ namespace arduino_due
       size_t RX_BUFFER_LENGTH,
       size_t TX_BUFFER_LENGTH
     > return_codes uart<TIMER,RX_BUFFER_LENGTH,TX_BUFFER_LENGTH>::_uart_ctx_::config(
-      timer_ids the_timer,
       uint32_t the_rx_pin,
       uint32_t the_tx_pin,
       uint32_t the_bit_rate,
@@ -834,8 +831,7 @@ namespace arduino_due
         (the_bit_rate>bit_rates::MAX_BIT_RATE)
       ) return return_codes::BAD_BIT_RATE_ERROR;
 
-      timer=the_timer;
-      timer_p=&(tc_timer_table[static_cast<uint32_t>(timer)]);
+      timer_p=&(tc_timer_table[static_cast<uint32_t>(TIMER)]);
       bit_rate=the_bit_rate;
       
       // NOTE: we will be using the fastest clock for TC ticks
