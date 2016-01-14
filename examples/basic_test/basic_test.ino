@@ -49,14 +49,15 @@ uint32_t counter=0;
 // declaration of software serial port object serial_tc4
 // which uses timer/counter channel TC4
 serial_tc4_declaration(RX_BUF_LENGTH,TX_BUF_LENGTH);
+auto& serial_obj=serial_tc4; // serial_tc4_t& serial_obj=serial_tc4;
 
 void setup() {
   // put your setup code here, to run once:
 
   Serial.begin(9600);
 
-  // serial_tc4 initialization
-  serial_tc4.begin(
+  // serial_obj initialization
+  serial_obj.begin(
     RX_PIN,
     TX_PIN,
     SOFT_UART_BIT_RATE,
@@ -66,8 +67,8 @@ void setup() {
   );
 
   // Serial2's initialization
-  // we will communicate serial_tc4 to Serial2 to test the library,
-  // so we have to config Serial2 in the same way that serial_tc4,
+  // we will communicate serial_obj to Serial2 to test the library,
+  // so we have to config Serial2 in the same way that serial_obj,
   // same bit rate, parity and stop bits
   Serial2.begin(SOFT_UART_BIT_RATE,SERIAL_8E1);
   while(Serial2.available()) { Serial2.read(); }
@@ -85,19 +86,23 @@ void loop() {
   Serial.print("--> [Serial2] sending: "); Serial.println(counter);
   Serial2.println(counter);
 
-  Serial.print("<-- [serial_tc4] received: ");
+  Serial.print("<-- [serial_tc"); 
+  Serial.print(static_cast<int>(serial_obj.get_timer())); 
+  Serial.print("] received: ");
   int data=-1;
   do
   {  
-    if( serial_tc4.available() && ((data=serial_tc4.read())>=0) )
+    if( serial_obj.available() && ((data=serial_obj.read())>=0) )
       Serial.print(static_cast<char>(data));
   } while((data>=0) && (data!=0xa));  
 
   Serial.println("--------------------------------------------------------");
   Serial.println("--------------------------------------------------------");
   
-  Serial.print("--> [serial_tc4] sending: "); Serial.println(counter);
-  serial_tc4.println(counter);
+  Serial.print("--> [serial_tc"); 
+  Serial.print(static_cast<int>(serial_obj.get_timer())); 
+  Serial.print("] sending: "); Serial.println(counter);
+  serial_obj.println(counter);
 
   Serial.print("<-- [Serial2] received: ");
   data=-1;

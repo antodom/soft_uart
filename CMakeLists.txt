@@ -1,48 +1,29 @@
+# CMakeLists.txt file for building project soft_uart
 cmake_minimum_required(VERSION 2.8)
+
+include(cmake/build_library.cmake)
 
 set(PORT /dev/ttyACM0 CACHE STRING "uploading serial port")
 set(IS_NATIVE_PORT true CACHE STRING "is it the native port? (true), or not? (false)")
 
-set(CMAKE_TOOLCHAIN_FILE arduino_due_toolchain.cmake)
+set(CMAKE_TOOLCHAIN_FILE cmake/arduino_due_toolchain.cmake)
 
 project(soft_uart C CXX)
 
-#####################################################################
-# generating a static library for the standard Arduino library: begin
-#####################################################################
-
-file(
-  GLOB ARDUINO_DUE_STD_LIB_SOURCE_FILES
-  LIST_DIRECTORIES false 
-  $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.6/cores/arduino/*.c
-  $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.6/cores/arduino/*.cpp
-  $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.6/cores/arduino/USB/*.c
-  $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.6/cores/arduino/USB/*.cpp
-  $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.6/variants/arduino_due_x/*.c
-  $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.6/variants/arduino_due_x/*.cpp
-  $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.6/libraries/SPI/*.c
-  $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.6/libraries/SPI/*.cpp
+# building Arduino Standard Library
+build_library(
+  arduino_due_std_lib 
+  SRC_PATHS 
+    $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.6/cores/arduino
+    $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.6/cores/arduino/USB
+    $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.6/variants/arduino_due_x
+    $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.6/libraries/SPI
+  INCLUDE_PATHS 
+    $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.6/cores/arduino
+    $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.6/cores/arduino/USB
+    $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.6/variants/arduino_due_x
+    $ENV{ARDUINO_DUE_ROOT_PATH}/hardware/sam/1.6.6/libraries/SPI
 )
-
-#mess(STATUS "ARDUINO_DUE_STD_LIB_SOURCE_FILES: ${ARDUINO_DUE_STD_LIB_SOURCE_FILES}")
-
-add_library(arduino_due_std_lib STATIC ${ARDUINO_DUE_STD_LIB_SOURCE_FILES})
-set_property(
-  TARGET arduino_due_std_lib PROPERTY 
-  LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-)
-target_compile_options(
-  arduino_due_std_lib PUBLIC 
-  -c -g -Os -w -ffunction-sections -fdata-sections -nostdlib -fno-threadsafe-statics --param max-inline-insns-single=500 -fno-rtti -fno-exceptions -MMD -mcpu=cortex-m3 -std=gnu++11 -mthumb
-)
-
-target_compile_definitions(
-  arduino_due_std_lib PUBLIC
-  -Dprintf=iprintf -DF_CPU=84000000L -DARDUINO=10605 -DARDUINO_SAM_DUE -DARDUINO_ARCH_SAM -D__SAM3X8E__ -DUSB_VID=0x2341 -DUSB_PID=0x003e -DUSBCON -DUSB_MANUFACTURER="Unknown" -DUSB_PRODUCT="Arduino Due"
-)
-#####################################################################
-# generating a static library for the standard Arduino library: end 
-#####################################################################
 
 # checking environment variable ARDUINO_IDE_LIBRARY_PATH
 if( 
@@ -59,41 +40,12 @@ else()
 
 endif()
 
-#####################################################################
-# generating a static library for soft_uart: begin
-#####################################################################
-
-file(
-  GLOB SOFT_UART_LIB_SOURCE_FILES
-  LIST_DIRECTORIES false 
-  $ENV{ARDUINO_IDE_LIBRARY_PATH}/libraries/soft_uart/*.c
-  $ENV{ARDUINO_IDE_LIBRARY_PATH}/libraries/soft_uart/*.cpp
+# build soft_uart library 
+build_library(
+  soft_uart_lib  
+  SRC_PATHS
+    $ENV{ARDUINO_IDE_LIBRARY_PATH}/libraries/soft_uart
 )
-
-#mess(STATUS "SOFT_UART_LIB_SOURCE_FILES: ${SOFT_UART_LIB_SOURCE_FILES}")
-
-add_library(soft_uart_lib STATIC ${SOFT_UART_LIB_SOURCE_FILES})
-set_property(
-  TARGET soft_uart_lib PROPERTY 
-  LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-)
-target_compile_options(
-  soft_uart_lib PUBLIC 
-  -c -g -Os -w -ffunction-sections -fdata-sections -nostdlib -fno-threadsafe-statics --param max-inline-insns-single=500 -fno-rtti -fno-exceptions -MMD -mcpu=cortex-m3 -std=gnu++11 -mthumb
-)
-
-target_compile_definitions(
-  soft_uart_lib PUBLIC
-  -Dprintf=iprintf -DF_CPU=84000000L -DARDUINO=10605 -DARDUINO_SAM_DUE -DARDUINO_ARCH_SAM -D__SAM3X8E__ -DUSB_VID=0x2341 -DUSB_PID=0x003e -DUSBCON -DUSB_MANUFACTURER="Unknown" -DUSB_PRODUCT="Arduino Due"
-)
-
-target_include_directories(
-  soft_uart_lib PUBLIC
-  $ENV{ARDUINO_IDE_LIBRARY_PATH}/libraries/soft_uart/
-)
-#####################################################################
-# generating a static library for soft_uart: end 
-#####################################################################
 
 #####################################################################
 # soft_uart examples: begin 

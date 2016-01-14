@@ -48,6 +48,7 @@ uint32_t counter=0;
 // declaration of software serial port object serial_tc4
 // which uses timer/counter channel TC4
 serial_tc4_declaration(RX_BUF_LENGTH,TX_BUF_LENGTH);
+auto& serial_obj=serial_tc4; // serial_tc4_t& serial_obj=serial_tc4;
 
 template<typename serial_tc_t>
 void receive_tc(serial_tc_t& serial_tc, unsigned long timeout)
@@ -86,14 +87,14 @@ void setup() {
 
   Serial.begin(9600);
 
-  // serial_tc4 initialization
-  // we will communicate serial_tc4 with itself, so RX_PIN and TX_PIN
+  // serial_obj initialization
+  // we will communicate serial_obj with itself, so RX_PIN and TX_PIN
   // should be connected. This example illustrate how to use the serial
   // objects provided by soft_uart with a length of 9 bits, because
   // the serial objects Serial, Serial1, Serial2 and Serial3 provided
   // by the standard Arduino library do not provide 9-bit lenght serial
   // modes
-  serial_tc4.begin(
+  serial_obj.begin(
     RX_PIN,
     TX_PIN,
     SOFT_UART_BIT_RATE,
@@ -112,16 +113,16 @@ void loop() {
   Serial.println("********************************************************");
   Serial.println("********************************************************");  
 
-  Serial.print("--> [serial_tc4] sending: "); Serial.println(counter);
+  Serial.print("--> [serial_obj] sending: "); Serial.println(counter);
   // IMPORTANT: for sending 9-bit values you should send each value separately 
   // using function write(uint32_t). Using functions print or println, or alike
   // function will truncate each data to be send to 8 bits.
-  serial_tc4.write(counter);
+  serial_obj.write(counter);
 
   unsigned long timeout=
-    static_cast<unsigned long>(2*1000*serial_tc4.get_frame_time());
+    static_cast<unsigned long>(2*1000*serial_obj.get_frame_time());
   if(timeout<RECEPTION_TIMEOUT) timeout=RECEPTION_TIMEOUT;
-  receive_tc(serial_tc4,timeout);
+  receive_tc(serial_obj,timeout);
  
   counter=(counter+1)%(1<<static_cast<int>(soft_uart::data_bit_codes::NINE_BITS));
 }

@@ -218,7 +218,9 @@ namespace arduino_due
 	~uart() { end(); }
   
         uart(const uart&) = delete;
+        uart(uart&&) = delete;
 	uart& operator=(const uart&) = delete;
+	uart& operator=(uart&&) = delete;
 
 	return_codes config(
 	  uint32_t rx_pin = default_pins::DEFAULT_RX_PIN,
@@ -659,6 +661,11 @@ namespace arduino_due
 	  _peek_data_valid_=false; 
 	  _last_data_status_=rx_data_status_codes::NO_DATA_AVAILABLE;
 	}
+
+	serial(const serial&) = delete;
+	serial(serial&&) = delete;
+	serial& operator=(const serial&) = delete;
+	serial& operator=(serial&&) = delete;
 	
 	void begin(unsigned long baud_rate)
 	{

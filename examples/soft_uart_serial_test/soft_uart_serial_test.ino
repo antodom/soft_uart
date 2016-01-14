@@ -50,6 +50,7 @@ uint32_t counter=0;
 // declaration of software serial port object serial_tc4
 // which uses timer/counter channel TC4
 serial_tc4_declaration(RX_BUF_LENGTH,TX_BUF_LENGTH);
+auto& serial_obj=serial_tc4; // serial_tc4_t& serial_obj=serial_tc4;
 
 template<typename serial_tc_t>
 void receive_tc(serial_tc_t& serial_tc,unsigned long timeout)
@@ -87,8 +88,8 @@ void setup() {
 
   Serial.begin(9600);
 
-  // serial_tc4 initialization
-  serial_tc4.begin(
+  // serial_obj initialization
+  serial_obj.begin(
     RX_PIN,
     TX_PIN,
     SOFT_UART_BIT_RATE,
@@ -98,8 +99,8 @@ void setup() {
   );
 
   // Serial2's initialization
-  // we will communicate serial_tc4 to Serial2 to test the library,
-  // so we have to config Serial2 in the same way that serial_tc4,
+  // we will communicate serial_obj to Serial2 to test the library,
+  // so we have to config Serial2 in the same way that serial_obj,
   // same bit rate, parity and stop bits
   Serial2.begin(SOFT_UART_BIT_RATE,SERIAL_8E1);
   while(Serial2.available()) { Serial2.read(); }
@@ -118,15 +119,18 @@ void loop() {
   Serial2.println(counter);
 
   unsigned long timeout=
-    static_cast<unsigned long>(2*1000*serial_tc4.get_frame_time());
+    static_cast<unsigned long>(2*1000*serial_obj.get_frame_time());
   if(timeout<RECEPTION_TIMEOUT) timeout=RECEPTION_TIMEOUT;
-  receive_tc(serial_tc4,timeout);
+  receive_tc(serial_obj,timeout);
  
   Serial.println("--------------------------------------------------------");
   Serial.println("--------------------------------------------------------");
   
-  Serial.print("--> [serial_tc4] sending: "); Serial.println(counter);
-  serial_tc4.println(counter);
+  Serial.print("--> [serial_tc"); 
+  Serial.print(static_cast<int>(serial_obj.get_timer())); 
+  Serial.print("] sending: "); Serial.println(counter);
+  serial_obj.println(counter);
+  serial_obj.println(counter);
 
   Serial.print("<-- [Serial2] received: ");
   int data=0;
