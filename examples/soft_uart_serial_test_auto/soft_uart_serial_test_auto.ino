@@ -50,37 +50,48 @@ uint32_t counter=0;
 serial_tc4_declaration(RX_BUF_LENGTH,TX_BUF_LENGTH);
 auto& serial_obj=serial_tc4; // serial_tc4_t& serial_obj=serial_tc4;
 
-template<typename serial_tc_t>
-void receive_tc(serial_tc_t& serial_tc, unsigned long timeout)
-{
-  Serial.print("<-- [serial_tc"); 
-  Serial.print(static_cast<int>(serial_tc.get_timer())); 
-  Serial.print("] received: ");
-  
-  int data=0; 
-  unsigned long last_time=millis();
-  
-  while(millis()-last_time<timeout)  
-  {
-    if(serial_tc.available()) 
-    {
-      if((data=serial_tc.read())>=0)
-      { Serial.println(data,DEC); break; }
-      else
-      {
-	if(serial_tc.bad_status())
-	{
-	  Serial.print("||");
-          if(serial_tc.bad_start_bit()) Serial.print("[BAD_START_BIT]");
-	  if(serial_tc.bad_parity()) Serial.print("[BAD_PARITY]");
-	  if(serial_tc.bad_stop_bit()) Serial.print("[BAD_STOP_BIT]");
-	  Serial.println("||");
-	  break;
-	}
-      }
-    }
-  }
+// FIX: function template receive_tc is defined in
+// #define to avoid it to be considered a function
+// prototype when integrating all .ino files in one
+// whole .cpp file. Without this trick the compiler
+// complains about the definition of the template
+// function.
+#define receive_tc_definition \
+template<typename serial_tc_t> \
+void receive_tc(serial_tc_t& serial_tc, unsigned long timeout) \
+{ \
+  Serial.print("<-- [serial_tc"); \ 
+  Serial.print(static_cast<int>(serial_tc.get_timer())); \ 
+  Serial.print("] received: "); \
+  \
+  int data=0; \  
+  unsigned long last_time=millis(); \ 
+  \  
+  while(millis()-last_time<timeout) \ 
+  { \
+    if(serial_tc.available()) \ 
+    { \
+      if((data=serial_tc.read())>=0) \
+      { Serial.println(data,DEC); break; } \
+      else \
+      { \
+	if(serial_tc.bad_status()) \
+	{ \
+	  Serial.print("||"); \
+          if(serial_tc.bad_start_bit()) Serial.print("[BAD_START_BIT]"); \
+	  if(serial_tc.bad_parity()) Serial.print("[BAD_PARITY]"); \
+	  if(serial_tc.bad_stop_bit()) Serial.print("[BAD_STOP_BIT]"); \
+	  Serial.println("||"); \
+	  break; \
+	} \
+      } \
+    } \
+  } \
 }
+
+// FIX: here we instantiate the template definition
+// of receive_tc
+receive_tc_definition;
 
 void setup() {
   // put your setup code here, to run once:
