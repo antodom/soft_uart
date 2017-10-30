@@ -68,6 +68,8 @@ namespace arduino_due
 
       bool is_empty() { return (_first_<0); }
 
+      bool is_full() { return (_items_==LENGTH); }
+
       int items() { return _items_; }
 
       void reset() { _init_(); }

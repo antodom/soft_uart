@@ -215,7 +215,7 @@ namespace arduino_due
 
         uart() { _mode_=mode_codes::INVALID_MODE; }
 
-      ~uart() { end(); }
+        ~uart() { end(); }
   
         uart(const uart&) = delete;
         uart(uart&&) = delete;
@@ -402,6 +402,17 @@ namespace arduino_due
         bool bad_stop_bit(uint32_t status) 
         { return _ctx_.bad_stop_bit(status); }
 
+        // is TX buffer full?
+        bool is_tx_full() 
+        { 
+          return (
+            (
+              (_mode_==mode_codes::FULL_DUPLEX) ||
+              (_mode_==mode_codes::TX_MODE)
+            )? _ctx_.is_tx_full(): false
+          ); 
+        }
+
         // NOTE: data is 5, 6, 7, 8 or 9 bits length
         bool set_tx_data(uint32_t data) 
         { 
@@ -414,6 +425,7 @@ namespace arduino_due
         }
 
         tx_status_codes get_tx_status() { return _ctx_.get_tx_status(); }
+
         void flush() { _ctx_.flush(); }
 
         void flush_rx() { _ctx_.flush_rx(); }
@@ -490,6 +502,15 @@ namespace arduino_due
           
           bool bad_stop_bit(uint32_t status)
           { return (status&rx_data_status_codes::BAD_STOP_BIT); }
+
+          // is TX buffer full?
+          bool is_tx_full() 
+          { 
+            disable_tc_interrupts();
+            auto full=tx_buffer.is_full();
+            enable_tc_interrupts();
+            return full;
+          }
 
           // NOTE: only the 5, 6, 7, 8  or 9 lowest significant bits
           // of data are send
@@ -724,6 +745,9 @@ namespace arduino_due
         void end() { _tc_uart_.end(); }
 
         int available(void) { return _tc_uart_.available(); }
+
+        int available_for_write(void) 
+        { return _tc_uart_.is_tx_full(); }
 
         int peek(void) 
         {
