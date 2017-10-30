@@ -56,14 +56,14 @@ namespace arduino_due
      
       bool pop(T& t)
       {
-	if(_first_<0) return false;
+        if(_first_<0) return false;
 
-	t=_buffer_p_[_first_];
+        t=_buffer_p_[_first_];
 
-	if(_first_==_last_) _init_();
-	else { _first_=(_first_+1)%LENGTH; _items_--; }
+        if(_first_==_last_) _init_();
+        else { _first_=(_first_+1)%LENGTH; _items_--; }
 
-	return true;
+        return true;
       }
 
       bool is_empty() { return (_first_<0); }
@@ -83,44 +83,44 @@ namespace arduino_due
       // when is full, we can not push any further element 
       bool _push_(const T& t,bool_to_type<false>)
       {
-	int new_last=(_last_+1)%LENGTH;
+        int new_last=(_last_+1)%LENGTH;
 
-	if(new_last==_first_) // full?
-	  return false;
+        if(new_last==_first_) // full?
+          return false;
 
-	_last_=new_last;
-	_buffer_p_[_last_]=t;
+        _last_=new_last;
+        _buffer_p_[_last_]=t;
 
-	if(_first_<0) _first_=_last_;
+        if(_first_<0) _first_=_last_;
 
-	_items_++;
+        _items_++;
 
-	return true;
+        return true;
       }
 
       // push implementation for a circular fifo
       // when is full, we overwrite the first element 
       bool _push_(const T& t,bool_to_type<true>)
       {
-	int new_last=(_last_+1)%LENGTH;
+        int new_last=(_last_+1)%LENGTH;
 
-	if(new_last==_first_) // full?
-	{
-	  // NOTE: when the fifo is circular and the fifo is full
-	  // the new element overwrites the first one 
-	  _first_=(_first_+1)%LENGTH;
-	  _last_=new_last; _buffer_p_[_last_]=t;
-	  return false;
-	}
+        if(new_last==_first_) // full?
+        {
+          // NOTE: when the fifo is circular and the fifo is full
+          // the new element overwrites the first one 
+          _first_=(_first_+1)%LENGTH;
+          _last_=new_last; _buffer_p_[_last_]=t;
+          return false;
+        }
 
-	_last_=new_last;
-	_buffer_p_[_last_]=t;
+        _last_=new_last;
+        _buffer_p_[_last_]=t;
 
-	if(_first_<0) _first_=_last_;
+        if(_first_<0) _first_=_last_;
 
-	_items_++;
+        _items_++;
 
-	return true;
+        return true;
       }
   };
 

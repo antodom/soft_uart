@@ -141,7 +141,6 @@ void loop() {
   Serial.print(static_cast<int>(serial_obj.get_timer())); 
   Serial.print("] sending: "); Serial.println(counter);
   serial_obj.println(counter);
-  serial_obj.println(counter);
 
   Serial.print("<-- [Serial2] received: ");
   int data=0;
