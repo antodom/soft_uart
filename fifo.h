@@ -72,6 +72,8 @@ namespace arduino_due
 
       int items() { return _items_; }
 
+      int available() { return LENGTH-_items_; }
+
       void reset() { _init_(); }
 
     private:

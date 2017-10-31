@@ -413,6 +413,17 @@ namespace arduino_due
           ); 
         }
 
+        // is TX buffer full?
+        bool available_for_write() 
+        { 
+          return (
+            (
+              (_mode_==mode_codes::FULL_DUPLEX) ||
+              (_mode_==mode_codes::TX_MODE)
+            )? _ctx_.available_for_write(): 0 
+          ); 
+        }
+
         // NOTE: data is 5, 6, 7, 8 or 9 bits length
         bool set_tx_data(uint32_t data) 
         { 
@@ -510,6 +521,14 @@ namespace arduino_due
             auto full=tx_buffer.is_full();
             enable_tc_interrupts();
             return full;
+          }
+
+          int available_for_write() 
+          { 
+            disable_tc_interrupts();
+            auto items=tx_buffer.available();
+            enable_tc_interrupts();
+            return items;
           }
 
           // NOTE: only the 5, 6, 7, 8  or 9 lowest significant bits
@@ -746,8 +765,11 @@ namespace arduino_due
 
         int available(void) { return _tc_uart_.available(); }
 
+        int availableForWrite(void)
+        { return available_for_write(); }
+
         int available_for_write(void) 
-        { return _tc_uart_.is_tx_full(); }
+        { return _tc_uart_.available_for_write(); }
 
         int peek(void) 
         {
@@ -795,6 +817,8 @@ namespace arduino_due
         
         size_t write(uint8_t data) 
         {
+          while(!available_for_write()) { /* nothing */ }
+
           return (
               (_tc_uart_.set_tx_data(static_cast<uint32_t>(data)))? 
                 1: 0 
@@ -803,6 +827,8 @@ namespace arduino_due
 
         size_t write(uint32_t data) 
         {
+          while(!available_for_write()) { /* nothing */ }
+
           return (
               (_tc_uart_.set_tx_data(data))? 
                 1: 0 
