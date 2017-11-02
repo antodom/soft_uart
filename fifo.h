@@ -79,7 +79,9 @@ namespace arduino_due
     private:
 
       T _buffer_p_[LENGTH];
-      int _first_,_last_,_items_;
+      int _first_,_last_;
+
+      volatile int _items_;
 
       void _init_() { _first_=_last_=-1; _items_=0; }
 
