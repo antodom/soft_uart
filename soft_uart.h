@@ -673,6 +673,7 @@ namespace arduino_due
           volatile uint32_t rx_bit;
           volatile rx_status_codes rx_status;
           volatile uint32_t rx_data_status;
+          volatile bool rx_at_end_quarter;
 
           // tx data
           fifo<uint32_t,TX_BUFFER_LENGTH> tx_buffer;
@@ -935,6 +936,7 @@ namespace arduino_due
       rx_status=rx_status_codes::LISTENING;
       rx_data_status=rx_data_status_codes::NO_DATA_AVAILABLE;
       rx_buffer.reset();
+      rx_at_end_quarter=false;
 
       rx_irq=(
         (rx_pio_p==PIOA)? 
@@ -993,21 +995,25 @@ namespace arduino_due
       {
         if(rx_status==rx_status_codes::RECEIVING)
         { 
-          get_incoming_bit();
-          if((rx_bit_counter++)==rx_frame_bits-1)  
+          if(!rx_at_end_quarter)
           {
-            if(stop_bits==stop_bit_codes::TWO_STOP_BITS)
-              get_incoming_bit();
+            get_incoming_bit();
+            if((rx_bit_counter++)==rx_frame_bits-1)  
+            {
+              if(stop_bits==stop_bit_codes::TWO_STOP_BITS)
+                get_incoming_bit();
 
-            disable_tc_ra_interrupt();
+              disable_tc_ra_interrupt();
 
-            if(tx_status==tx_status_codes::IDLE)
-              stop_tc_interrupts();
+              if(tx_status==tx_status_codes::IDLE)
+                stop_tc_interrupts();
 
-            update_rx_data_buffer();
+              update_rx_data_buffer();
 
-            rx_status=rx_status_codes::LISTENING;
+              rx_status=rx_status_codes::LISTENING;
+            }
           }
+          else rx_at_end_quarter=false;
         }
       }
      
@@ -1095,10 +1101,16 @@ namespace arduino_due
               register uint32_t timer_value=
                 TC_ReadCV(timer_p->tc_p,timer_p->channel);
 
-              if(
-                (timer_value<=(bit_1st_half>>1)) || 
-                (timer_value>bit_1st_half+(bit_1st_half>>1))
-              ) enable_tc_ra_interrupt();
+              if(timer_value<=(bit_1st_half>>1)) 
+                enable_tc_ra_interrupt();
+              else
+              {
+                if(timer_value>bit_1st_half+(bit_1st_half>>1))
+                {
+                  enable_tc_ra_interrupt();
+                  rx_at_end_quarter=true;
+                }
+              }
             }
           } 
           break;

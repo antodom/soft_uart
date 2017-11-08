@@ -124,7 +124,7 @@ void loop() {
   Serial.println("********************************************************");
   Serial.println("********************************************************");  
 
-  Serial.print("--> [serial_obj] sending: "); Serial.println(counter);
+  Serial.print("--> [serial_tc4] sending: "); Serial.println(counter);
   // IMPORTANT: for sending 9-bit values you should send each value separately 
   // using function write(uint32_t). Using functions print or println, or alike
   // function will truncate each data to be send to 8 bits.
