@@ -40,7 +40,7 @@ using namespace arduino_due;
 
 #define RX_PIN 10 // software serial port's reception pin
 #define TX_PIN 11 // software serial port's transmision pin
-#define SOFT_UART_BIT_RATE 57600 // 57600 38400 1200 19200 9600 115200 300
+#define SOFT_UART_BIT_RATE 115200 // 57600 38400 1200 19200 9600 115200 300
 #define RX_BUF_LENGTH 256 // software serial port's reception buffer length
 #define TX_BUF_LENGTH 256 // software serial port's transmision buffer length
 #define RECEPTION_TIMEOUT 100 // milliseconds
@@ -106,14 +106,16 @@ void setup() {
     SOFT_UART_BIT_RATE,
     soft_uart::data_bit_codes::EIGHT_BITS,
     soft_uart::parity_codes::EVEN_PARITY,
-    soft_uart::stop_bit_codes::ONE_STOP_BIT
+    //soft_uart::stop_bit_codes::ONE_STOP_BIT
+    soft_uart::stop_bit_codes::TWO_STOP_BITS
   );
 
   // Serial2's initialization
   // we will communicate serial_obj to Serial2 to test the library,
   // so we have to config Serial2 in the same way that serial_obj,
   // same bit rate, parity and stop bits
-  Serial2.begin(SOFT_UART_BIT_RATE,SERIAL_8E1);
+  //Serial2.begin(SOFT_UART_BIT_RATE,SERIAL_8E1);
+  Serial2.begin(SOFT_UART_BIT_RATE,SERIAL_8E2);
   while(Serial2.available()) { Serial2.read(); }
    
   Serial.println("========================================================");

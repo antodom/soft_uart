@@ -78,16 +78,16 @@ void receive_tc(serial_tc_t& serial_tc, unsigned long timeout) \
       { last_time=millis(); Serial.print(data,DEC); } \
       else \
       { \
-	if(serial_tc.bad_status()) \
-	{ \
-	  last_time=millis(); \
-	  Serial.print("||"); \
-	  if(serial_tc.bad_start_bit()) Serial.print("[BAD_START_BIT]"); \
-	  if(serial_tc.bad_parity()) Serial.print("[BAD_PARITY]"); \
-	  if(serial_tc.bad_stop_bit()) Serial.print("[BAD_STOP_BIT]"); \
-	  Serial.print((serial_tc.get_last_data_status()>>16),BIN); \
-	  Serial.print("||"); \
-	} \
+        if(serial_tc.bad_status()) \
+        { \
+          last_time=millis(); \
+          Serial.print("||"); \
+          if(serial_tc.bad_start_bit()) Serial.print("[BAD_START_BIT]"); \
+          if(serial_tc.bad_parity()) Serial.print("[BAD_PARITY]"); \
+          if(serial_tc.bad_stop_bit()) Serial.print("[BAD_STOP_BIT]"); \
+          Serial.print((serial_tc.get_last_data_status()>>16),BIN); \
+          Serial.print("||"); \
+        } \
       } \
     } \
   } \

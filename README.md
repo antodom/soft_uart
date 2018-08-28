@@ -1,4 +1,4 @@
-## soft_uart v1.1
+## soft_uart v2.0
 
 This is soft_uart library for the Arduino DUE electronic prototyping platform. 
 

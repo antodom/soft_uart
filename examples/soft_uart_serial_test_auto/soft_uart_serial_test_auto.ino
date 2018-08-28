@@ -128,7 +128,7 @@ void loop() {
   // IMPORTANT: for sending 9-bit values you should send each value separately 
   // using function write(uint32_t). Using functions print or println, or alike
   // function will truncate each data to be send to 8 bits.
-  serial_obj.write(counter);
+  if(!serial_obj.write(counter)) Serial.println(" [sending unsuccessful]");;
 
   unsigned long timeout=
     static_cast<unsigned long>(2*1000*serial_obj.get_frame_time());
