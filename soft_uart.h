@@ -1093,13 +1093,6 @@ namespace arduino_due
             rx_interrupt_counter=0;
             
             if(tx_status==tx_status_codes::IDLE) start_tc_interrupts(); 
-            //else 
-            //{
-            //  register uint32_t timer_value=
-            //    TC_ReadCV(timer_p->tc_p,timer_p->channel);
-
-            //  if(timer_value>=(bit_1st_half>>1)) rx_interrupt_counter=0;
-            //}
           } 
           break;
           

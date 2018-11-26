@@ -66,5 +66,6 @@ void loop()
     auto data=serial_obj.read();
     if(data>=0) 
       serial_obj.write(static_cast<uint8_t>(data&0xff));
+  }
 }
 
