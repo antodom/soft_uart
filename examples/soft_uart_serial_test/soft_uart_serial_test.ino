@@ -1,6 +1,6 @@
 /**
  ** soft_uart library
- ** Copyright (C) 2015
+ ** Copyright (C) 2015-2018
  **
  **   Antonio C. Domínguez Brito <adominguez@iusiani.ulpgc.es>
  **     División de Robótica y Oceanografía Computacional <www.roc.siani.es>
@@ -40,7 +40,7 @@ using namespace arduino_due;
 
 #define RX_PIN 10 // software serial port's reception pin
 #define TX_PIN 11 // software serial port's transmision pin
-#define SOFT_UART_BIT_RATE 115200 // 57600 38400 1200 19200 9600 115200 300
+#define SOFT_UART_BIT_RATE  57600 // 57600 38400 1200 19200 9600 115200 300
 #define RX_BUF_LENGTH 256 // software serial port's reception buffer length
 #define TX_BUF_LENGTH 256 // software serial port's transmision buffer length
 #define RECEPTION_TIMEOUT 100 // milliseconds

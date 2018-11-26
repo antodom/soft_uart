@@ -1,6 +1,6 @@
 /**
  ** soft_uart library
- ** Copyright (C) 2015
+ ** Copyright (C) 2015-2018
  **
  **   Antonio C. Domínguez Brito <adominguez@iusiani.ulpgc.es>
  **     División de Robótica y Oceanografía Computacional <www.roc.siani.es>
@@ -670,6 +670,7 @@ namespace arduino_due
           double frame_time;
           uint32_t bit_ticks;
           uint32_t bit_1st_half;
+          uint32_t bit_1st_quarter;
 
           // serial protocol
           uint32_t bit_rate;
@@ -923,6 +924,7 @@ namespace arduino_due
   
       bit_ticks=static_cast<uint32_t>(bit_time/tc_tick);
       bit_1st_half=(bit_ticks>>1);
+      bit_1st_quarter=(bit_ticks>>2);
 
       data_bits=the_data_bits; parity=the_parity; stop_bits=the_stop_bits;
 
@@ -991,7 +993,8 @@ namespace arduino_due
       //disable_tc_ra_interrupt();
 
       //TC_SetRC(timer_p->tc_p,timer_p->channel,bit_ticks);
-      TC_SetRC(timer_p->tc_p,timer_p->channel,bit_1st_half);
+      //TC_SetRC(timer_p->tc_p,timer_p->channel,bit_1st_half);
+      TC_SetRC(timer_p->tc_p,timer_p->channel,bit_1st_quarter);
       //disable_tc_rc_interrupt();
       enable_tc_rc_interrupt();
 
@@ -1020,10 +1023,11 @@ namespace arduino_due
         // rx code
         if(rx_status==rx_status_codes::RECEIVING)
         {
-          if((rx_interrupt_counter++)&1)
+          if(rx_interrupt_counter==1)
           {
-            get_incoming_bit();
-            if((rx_bit_counter++)==rx_frame_bits-1)
+            get_incoming_bit(); 
+            rx_bit_counter++;
+            if(rx_bit_counter==rx_frame_bits)
             {
               if(stop_bits==stop_bit_codes::TWO_STOP_BITS)
                 get_incoming_bit();
@@ -1035,27 +1039,33 @@ namespace arduino_due
               rx_status=rx_status_codes::LISTENING;
             }
           }
+          rx_interrupt_counter=(rx_interrupt_counter+1)&0x3;
         }
 
         // tx code
         if(tx_status==tx_status_codes::SENDING)
         {
-          if((tx_interrupt_counter++)&1)
+          if(tx_interrupt_counter==0)
           {
-            set_outgoing_bit();
-            if((tx_bit_counter++)==tx_frame_bits-1) 
+            if(tx_bit_counter>=tx_frame_bits)
             {
               uint32_t data_to_send;
               if(tx_buffer.pop(data_to_send)) 
-              { tx_data=data_to_send; tx_bit_counter=0; }
+              { 
+                tx_data=data_to_send; tx_bit_counter=0; 
+                set_outgoing_bit(); tx_bit_counter++;
+              }
               else
               {
-                if(rx_status==rx_status_codes::LISTENING) stop_tc_interrupts(); 
+                if(rx_status==rx_status_codes::LISTENING) 
+                  stop_tc_interrupts(); 
 
                 tx_status=tx_status_codes::IDLE;
               }
             }
+            else { set_outgoing_bit(); tx_bit_counter++; }
           }
+          tx_interrupt_counter=(tx_interrupt_counter+1)&0x3;
         }
       }
     }
@@ -1080,16 +1090,16 @@ namespace arduino_due
           {
             rx_status=rx_status_codes::RECEIVING;
             rx_data=rx_bit_counter=rx_bit=0;
-            rx_interrupt_counter=1;
+            rx_interrupt_counter=0;
             
             if(tx_status==tx_status_codes::IDLE) start_tc_interrupts(); 
-            else 
-            {
-              register uint32_t timer_value=
-                TC_ReadCV(timer_p->tc_p,timer_p->channel);
+            //else 
+            //{
+            //  register uint32_t timer_value=
+            //    TC_ReadCV(timer_p->tc_p,timer_p->channel);
 
-              if(timer_value>=(bit_1st_half>>1)) rx_interrupt_counter=0;
-            }
+            //  if(timer_value>=(bit_1st_half>>1)) rx_interrupt_counter=0;
+            //}
           } 
           break;
           
@@ -1213,7 +1223,7 @@ namespace arduino_due
       {
         tx_buffer.pop(data_to_send); 
         tx_data=data_to_send; tx_bit_counter=0; 
-        tx_interrupt_counter=1;
+        tx_interrupt_counter=0;
       }
 
       if(

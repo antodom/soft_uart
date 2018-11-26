@@ -59,6 +59,7 @@ set(
   soft_uart_serial_test_half_duplex
   soft_uart_serial_test_half_duplex_9O2
   soft_uart_serial_test_half_duplex_char
+  echo_test
 )
 
 foreach(src_example ${SOFT_UART_EXAMPLES})

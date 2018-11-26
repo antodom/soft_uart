@@ -1,8 +1,8 @@
-## soft_uart v2.0
+## soft_uart v3.0
 
 This is soft_uart library for the Arduino DUE electronic prototyping platform. 
 
-Copyright (C) 2015 Antonio C. Domínguez Brito (<adominguez@iusiani.ulpgc.es>). División de Robótica y Oceanografía Computacional (<http://www.roc.siani.es>) and Departamento de Informática y Sistemas (<http://www.dis.ulpgc.es>). Universidad de Las Palmas de Gran  Canaria (ULPGC) (<http://www.ulpgc.es>).
+Copyright (C) 2015-2018 Antonio C. Domínguez Brito (<adominguez@iusiani.ulpgc.es>). División de Robótica y Oceanografía Computacional (<http://www.roc.siani.es>) and Departamento de Informática y Sistemas (<http://www.dis.ulpgc.es>). Universidad de Las Palmas de Gran  Canaria (ULPGC) (<http://www.ulpgc.es>).
   
 ### 0. License 
 
@@ -137,7 +137,13 @@ In this section we would like to enumerate users using the library in their own 
 
 The list of users/projects goes now:
 
-1. **Project:** Autonomous sailboat A-Tirma (<http://velerorobot.blogspot.com.es>). **User**: División de Robótica y Oceanografía Computacional (<http://www.roc.siani.es>). **Description**: The library was a specific development for this project. The sailboat onboard system is based on an Arduino DUE, and we ran out of hardware serial ports for all the hardware we use on the boat.
+1. **Project:** Autonomous sailboat A-Tirma (<http://velerorobot.blogspot.com.es>). **User:** División de Robótica y Oceanografía Computacional (<http://www.roc.siani.es>). **Description:** The library was a specific development for this project. The sailboat onboard system is based on an Arduino DUE, and we ran out of hardware serial ports for all the hardware we use on the boat.
+
+2. **Project:** Arduino Altair 8800 simulator (<https://github.com/dhansel/Altair8800>). **User:** David Hansel (<david@hansels.net>). **Description:** Source code for Arduino Altair 8800 simulator.  
+
+### 9. Acknowledgements
+
+David Hansel for his suggestions and debugging of the library, soft_uart version 2.0 and 3.0 owe a lot to his findings. 
 
 ### 8. Feedback & Suggestions
 
