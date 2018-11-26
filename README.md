@@ -141,10 +141,10 @@ The list of users/projects goes now:
 
 2. **Project:** Arduino Altair 8800 simulator (<https://github.com/dhansel/Altair8800>). **User:** David Hansel (<david@hansels.net>). **Description:** Source code for Arduino Altair 8800 simulator.  
 
-### 9. Acknowledgements
+### 8. Acknowledgements
 
 David Hansel for his suggestions and debugging of the library, soft_uart version 2.0 and 3.0 owe a lot to his findings. 
 
-### 8. Feedback & Suggestions
+### 9. Feedback & Suggestions
 
 Please be free to send me any comment, doubt of use, or suggestion in relation to soft_uart.
