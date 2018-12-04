@@ -1092,7 +1092,8 @@ namespace arduino_due
             rx_data=rx_bit_counter=rx_bit=0;
             rx_interrupt_counter=0;
             
-            if(tx_status==tx_status_codes::IDLE) start_tc_interrupts(); 
+            if(tx_status==tx_status_codes::IDLE) 
+            { start_tc_interrupts(); rx_interrupt_counter=1; }
           } 
           break;
           
