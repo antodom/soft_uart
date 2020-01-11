@@ -34,29 +34,34 @@
 
 #include "soft_uart.h"
 
-namespace arduino_due
-{
+#ifndef CHIBIOS_PORT
 
   namespace soft_uart
   {
-
-    tc_timer_data 
-      tc_timer_table[static_cast<uint32_t>(timer_ids::TIMER_IDS)]=
-    {
-      {TC0,0,TC0_IRQn},
-      {TC0,1,TC1_IRQn},
-      {TC0,2,TC2_IRQn},
-      {TC1,0,TC3_IRQn},
-      {TC1,1,TC4_IRQn},
-      {TC1,2,TC5_IRQn},
-      {TC2,0,TC6_IRQn},
-      {TC2,1,TC7_IRQn},
-      {TC2,2,TC8_IRQn},
-    };
   
-  }
+    namespace arduino_due
+    {
+  
+      tc_timer_data 
+        tc_timer_table[static_cast<uint32_t>(timer_ids::TIMER_IDS)]=
+      {
+        {TC0,0,TC0_IRQn},
+        {TC0,1,TC1_IRQn},
+        {TC0,2,TC2_IRQn},
+        {TC1,0,TC3_IRQn},
+        {TC1,1,TC4_IRQn},
+        {TC1,2,TC5_IRQn},
+        {TC2,0,TC6_IRQn},
+        {TC2,1,TC7_IRQn},
+        {TC2,2,TC8_IRQn},
+      };
+    
+    } // namespace arduino_due
+  
+  } //namespace soft_uart
 
+#else // CHIBIOS_PORT
 
-}
+#endif // CHIBIOS_PORT
 
 

@@ -34,7 +34,8 @@
 
 #include "soft_uart.h"
 
-using namespace arduino_due;
+using namespace soft_uart;
+using namespace soft_uart::arduino_due;
 
 #define SERIAL_TC0_PIN 10 // TC0 software serial port's half duplex pin
 #define SERIAL_TC1_PIN 11 // TC1 software serial port's half duplex pin

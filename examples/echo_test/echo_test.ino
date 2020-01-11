@@ -33,7 +33,8 @@
 
 #include "soft_uart.h"
 
-using namespace arduino_due;
+using namespace soft_uart;
+using namespace soft_uart::arduino_due;
 
 #define RX_PIN 10 // software serial port's reception pin
 #define TX_PIN 11 // software serial port's transmision pin
