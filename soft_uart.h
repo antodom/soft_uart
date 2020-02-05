@@ -36,6 +36,9 @@
   #define SOFT_UART_H
 
   #include <cstdint>
+    
+  #include "fifo.h"
+
   namespace soft_uart
   {
 
@@ -115,8 +118,6 @@
     #include "Arduino.h"
     
     #include <type_traits>
-    
-    #include "fifo.h"
     
     #define serial_tc_declaration(id,rx_length,tx_length) \
     void TC##id##_Handler(void) \
@@ -1293,7 +1294,7 @@
       
             return_codes config(
               gpio_port_t rx_port, uint32_t rx_pin,
-              gpio_port_t tx_port, uint32_t tx_pin
+              gpio_port_t tx_port, uint32_t tx_pin,
               uint32_t bit_rate = bit_rates::DEFAULT_BIT_RATE,
               data_bit_codes the_data_bits = data_bit_codes::EIGHT_BITS,
               parity_codes the_parity = parity_codes::EVEN_PARITY,
@@ -1558,7 +1559,7 @@
       
               return_codes config(
                 gpio_port_t the_rx_port, uint32_t the_rx_pin,
-                gpio_port_t the_tx_port, uint32_t the_tx_pin
+                gpio_port_t the_tx_port, uint32_t the_tx_pin,
                 uint32_t the_bit_rate,
                 data_bit_codes the_data_bits,
                 parity_codes the_parity,
@@ -1573,7 +1574,7 @@
                 gptStopTimer(TIMER); gptStop(TIMER);
 
                 // disabling reception
-                padDisablePadEvent(rx_port,rx_pin);
+                palDisablePadEvent(rx_port,rx_pin);
               }
 
               void tc_interrupt();
@@ -1679,10 +1680,10 @@
                 else palClearPad(tx_port,tx_pin);
               }
       
-              gpio_port_t rx_port
+              gpio_port_t rx_port;
               uint32_t rx_pin;
       
-              gpio_port_t tx_port
+              gpio_port_t tx_port;
               uint32_t tx_pin;
       
               double tc_tick;
@@ -1766,7 +1767,7 @@
           TX_BUFFER_LENGTH
         >::_uart_ctx_::config(
           gpio_port_t the_rx_port, uint32_t the_rx_pin,
-          gpio_port_t the_tx_port, uint32_t the_tx_pin
+          gpio_port_t the_tx_port, uint32_t the_tx_pin,
           uint32_t the_bit_rate,
           data_bit_codes the_data_bits,
           parity_codes the_parity,
@@ -1824,7 +1825,7 @@
           tx_buffer.reset();
           tx_interrupt_counter=0;
 
-          gptStart(TIMER);
+          gptStart(TIMER,&_gpt_config_);
       
           return return_codes::EVERYTHING_OK;
         }
