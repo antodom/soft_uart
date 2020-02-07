@@ -1784,9 +1784,9 @@
           tc_tick=double(1)/double(_gpt_config_.frequency);
           bit_time=double(1)/double(bit_rate);
         
-          bit_ticks=static_cast<uint32_t>(bit_time/tc_tick);
-          bit_1st_half=(bit_ticks>>1);
-          bit_1st_quarter=(bit_ticks>>2);
+          bit_1st_quarter=static_cast<uint32_t>(bit_time/(4*tc_tick));
+          bit_1st_half=(bit_1st_quarter<<1);
+          bit_ticks=(bit_1st_half<<1);
       
           data_bits=the_data_bits; parity=the_parity; stop_bits=the_stop_bits;
       
