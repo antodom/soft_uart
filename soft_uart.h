@@ -1450,7 +1450,7 @@
               // waiting to finish reception
               while(_ctx_.rx_status==rx_status_codes::RECEIVING) { /* do nothing */ } 
       
-              padDisablePadEvent(_ctx_.rx_port,_ctx_.rx_pin);
+              palDisablePadEvent(_ctx_.rx_port,_ctx_.rx_pin);
               // cofigure tx pin
               palSetPadMode(
                 _ctx_.tx_port,_ctx_.tx_pin,
