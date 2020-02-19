@@ -64,7 +64,7 @@ set(
 
 foreach(src_example ${SOFT_UART_EXAMPLES})
   configure_file(
-    ${PROJECT_SOURCE_DIR}/examples/${src_example}/${src_example}.ino
+    ${PROJECT_SOURCE_DIR}/examples/due/${src_example}/${src_example}.ino
     ${src_example}.cpp
     COPYONLY
   )
