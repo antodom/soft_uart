@@ -164,7 +164,35 @@ For compiling on command line using CMake, just proceed in the following manner:
 
 CMake support not implemented for ChibiOS.
 
-### 7. Library users
+
+### 7. Version changes
+
+#### 7.1 v4.0
+
+The main change in this version is the porting of the library to ChibiOS for working with STM32 Nucleo boards. This change has affected lightly the implementation of the library for the Arduino DUE. Basically the namespaces of the library have changed a bit. For adapting your working code in Arduino DUE for the new version you have to change namespaces sentences like this in the previous version:
+
+```
+  ... 
+  #include "soft_uart.h"
+
+  using namespace arduino_due; 
+  ...
+```
+
+for this:
+
+```
+  ... 
+  #include "soft_uart.h"
+
+  using namespace soft_uart;
+  using namespace soft_uart::arduino_due;
+  ...
+```
+
+If in doubt, have a look to the examples.
+
+### 8. Library users
 
 In this section we would like to enumerate users using the library in their own projects and developments. So please, if your are using the library, drop us an email indicating in what project or development you are using it.
 
@@ -174,10 +202,10 @@ The list of users/projects goes now:
 
 2. **Project:** Arduino Altair 8800 simulator (<https://github.com/dhansel/Altair8800>). **User:** David Hansel (<david@hansels.net>). **Description:** Source code for Arduino Altair 8800 simulator.  
 
-### 8. Acknowledgements
+### 9. Acknowledgements
 
 To David Hansel for his suggestions and debugging of the library, soft_uart version 2.0 and 3.0 owe a lot to his findings. 
 
-### 9. Feedback & Suggestions
+### 10. Feedback & Suggestions
 
 Please be free to send me any comment, doubt of use, or suggestion in relation to soft_uart.
