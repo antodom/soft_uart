@@ -2029,14 +2029,14 @@
           else
             data_to_send=data_to_send|(0x3<<first_stop_bit_pos);
       
-	  rx_status_codes rx_status_tmp; 
-	  tx_status_codes tx_status_tmp;
-	  {
+	        rx_status_codes rx_status_tmp; 
+	        tx_status_codes tx_status_tmp;
+	        {
             system_guard guard;
-      
+            
             if(!tx_buffer.push(data_to_send))  
               return false; // tx buffer full
-      
+            
             if(tx_status==tx_status_codes::IDLE)
             {
               tx_buffer.pop(data_to_send); 
@@ -2044,11 +2044,11 @@
               tx_interrupt_counter=0;
             }
 
-            tx_status=tx_status_codes::SENDING;
+	          rx_status_tmp=rx_status;
+	          tx_status_tmp=tx_status;
 
-	    rx_status_tmp=rx_status;
-	    tx_status_tmp=tx_status;
-	  }
+            tx_status=tx_status_codes::SENDING;
+	        }
 
           if(
             (rx_status_tmp==rx_status_codes::LISTENING)
