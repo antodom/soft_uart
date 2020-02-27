@@ -2029,7 +2029,8 @@
           else
             data_to_send=data_to_send|(0x3<<first_stop_bit_pos);
       
-	  uint32_t rx_status_tmp, tx_status_tmp;
+	  rx_status_codes rx_status_tmp; 
+	  tx_status_codes tx_status_tmp;
 	  {
             system_guard guard;
       
