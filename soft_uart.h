@@ -1216,12 +1216,10 @@
           else
             data_to_send=data_to_send|(0x3<<first_stop_bit_pos);
       
-          register bool not_full;
           interrupt_guard guard;
       
-          not_full=tx_buffer.push(data_to_send);
-      
-          if(!not_full) return false;
+          if(!tx_buffer.push(data_to_send))  
+            return false; // tx buffer full
       
           if(tx_status==tx_status_codes::IDLE)
           {
@@ -2031,26 +2029,30 @@
           else
             data_to_send=data_to_send|(0x3<<first_stop_bit_pos);
       
-          register bool not_full;
-          system_guard guard;
+	  uint32_t rx_status_tmp, tx_status_tmp;
+	  {
+            system_guard guard;
       
-          not_full=tx_buffer.push(data_to_send);
+            if(!tx_buffer.push(data_to_send))  
+              return false; // tx buffer full
       
-          if(!not_full) return false;
-      
-          if(tx_status==tx_status_codes::IDLE)
-          {
-            tx_buffer.pop(data_to_send); 
-            tx_data=data_to_send; tx_bit_counter=0; 
-            tx_interrupt_counter=0;
-          }
-      
+            if(tx_status==tx_status_codes::IDLE)
+            {
+              tx_buffer.pop(data_to_send); 
+              tx_data=data_to_send; tx_bit_counter=0; 
+              tx_interrupt_counter=0;
+            }
+
+            tx_status=tx_status_codes::SENDING;
+
+	    rx_status_tmp=rx_status;
+	    tx_status_tmp=rx_status;
+	  }
+
           if(
-            (rx_status==rx_status_codes::LISTENING)
-            && (tx_status==tx_status_codes::IDLE) 
+            (rx_status_tmp==rx_status_codes::LISTENING)
+            && (tx_status_tmp==tx_status_codes::IDLE) 
           ) gptStartContinuous(TIMER,bit_1st_quarter);
-      
-          tx_status=tx_status_codes::SENDING;
       
           return true;
         }
