@@ -2047,7 +2047,7 @@
             tx_status=tx_status_codes::SENDING;
 
 	    rx_status_tmp=rx_status;
-	    tx_status_tmp=rx_status;
+	    tx_status_tmp=tx_status;
 	  }
 
           if(
