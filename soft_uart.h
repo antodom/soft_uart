@@ -405,7 +405,9 @@
                   (_mode_==mode_codes::RX_MODE)
                 )? 
                   _ctx_.get_rx_data(data): 
-                  rx_data_status_codes::NO_DATA_AVAILABLE
+                  static_cast<uint32_t>(
+                    rx_data_status_codes::NO_DATA_AVAILABLE
+                  )
               );
             }
       
@@ -832,7 +834,7 @@
               return _last_data_; 
             }
       
-            bool data_available() { _tc_uart_.data_available(_last_data_status_); }
+            bool data_available() { return _tc_uart_.data_available(_last_data_status_); }
       
             bool data_lost() { return _tc_uart_.data_lost(_last_data_status_); }
       
@@ -1481,7 +1483,9 @@
                   (_mode_==mode_codes::RX_MODE)
                 )? 
                   _ctx_.get_rx_data(data): 
-                  rx_data_status_codes::NO_DATA_AVAILABLE
+                  static_cast<uint32_t>(
+                    rx_data_status_codes::NO_DATA_AVAILABLE
+                  )
               );
             }
       
