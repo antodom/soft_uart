@@ -44,7 +44,12 @@ class basic_fifo
 {
   public:
 
-    basic_fifo() { _init_(); }
+    basic_fifo()
+    : 
+      _first_{0},
+      _last_{LENGTH-1},
+      _items_{0}
+    {}
 
     ~basic_fifo() {}
 
@@ -53,17 +58,17 @@ class basic_fifo
    
     bool pop(T& t)
     {
-      if(_first_<0) return false;
+      if(is_empty()) return false;
 
-      t=_buffer_p_[_first_];
+      t=_buffer_[_first_];
 
-      if(_first_==_last_) _init_();
-      else { _first_=(_first_+1)%LENGTH; _items_--; }
+      _items_--;
+       _first_=(_first_+1)%LENGTH;
 
       return true;
     }
 
-    bool is_empty() { return (_first_<0); }
+    bool is_empty() { return (_items_==0); }
 
     bool is_full() { return (_items_==LENGTH); }
 
@@ -71,31 +76,23 @@ class basic_fifo
 
     int available() { return LENGTH-_items_; }
 
-    void reset() { _init_(); }
+    void reset() { _items_=0; _first_=0; _last_=LENGTH-1; }
 
   private:
 
-    T _buffer_p_[LENGTH];
+    T _buffer_[LENGTH];
     int _first_,_last_;
 
-    volatile int _items_;
-
-    void _init_() { _first_=_last_=-1; _items_=0; }
+    int _items_;
 
     // push implementation for a normal fifo
     // when is full, we can not push any further element 
     bool _push_(const T& t,bool_to_type<false>)
     {
-      int new_last=(_last_+1)%LENGTH;
+      if(is_full()) return false;
 
-      if(new_last==_first_) // full?
-        return false;
-
-      _last_=new_last;
-      _buffer_p_[_last_]=t;
-
-      if(_first_<0) _first_=_last_;
-
+      _last_=(_last_+1)%LENGTH;
+      _buffer_[_last_]=t;
       _items_++;
 
       return true;
@@ -105,25 +102,17 @@ class basic_fifo
     // when is full, we overwrite the first element 
     bool _push_(const T& t,bool_to_type<true>)
     {
-      int new_last=(_last_+1)%LENGTH;
+      bool full=is_full();
+      
+      // NOTE: when the fifo is circular and the fifo is full 
+      // the new element overwrites the first one 
+      if(full) _first_=(_first_+1)%LENGTH;  
+      else _items_++;
 
-      if(new_last==_first_) // full?
-      {
-        // NOTE: when the fifo is circular and the fifo is full
-        // the new element overwrites the first one 
-        _first_=(_first_+1)%LENGTH;
-        _last_=new_last; _buffer_p_[_last_]=t;
-        return false;
-      }
+      _last_=(_last_+1)%LENGTH;
+      _buffer_[_last_]=t;
 
-      _last_=new_last;
-      _buffer_p_[_last_]=t;
-
-      if(_first_<0) _first_=_last_;
-
-      _items_++;
-
-      return true;
+      return full;
     }
 };
 
