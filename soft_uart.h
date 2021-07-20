@@ -1548,7 +1548,7 @@
       
           private:
 
-            static void _gpt_callback_(GPTDriver* gptp)
+            static void _gpt_callback_(GPTDriver*)
             { _ctx_.tc_interrupt(); }
 
             static const GPTConfig _gpt_config_;
