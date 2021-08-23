@@ -739,7 +739,7 @@
             serial& operator=(const serial&) = delete;
             serial& operator=(serial&&) = delete;
             
-            void begin(unsigned long baud_rate)
+            void begin(unsigned long baud_rate) override 
             {
               _tc_uart_.config(
                 default_pins::DEFAULT_RX_PIN,
@@ -793,9 +793,9 @@
               );
             }
       
-            void end() { _tc_uart_.end(); }
+            void end() override { _tc_uart_.end(); }
       
-            int available(void) { return _tc_uart_.available(); }
+            int available(void) override { return _tc_uart_.available(); }
       
             int availableForWrite(void)
             { return available_for_write(); }
@@ -803,7 +803,7 @@
             int available_for_write(void) 
             { return _tc_uart_.available_for_write(); }
       
-            int peek(void) 
+            int peek(void) override 
             {
               if(_peek_data_valid_) return _last_data_;
       
@@ -819,7 +819,7 @@
               return _last_data_;
             }
       
-            int read(void) 
+            int read(void) override 
             {
               if(_peek_data_valid_) 
               { _peek_data_valid_=false; return _last_data_; }
@@ -845,9 +845,9 @@
             bool bad_parity() { return _tc_uart_.bad_parity(_last_data_status_); }
             bool bad_stop_bit() { return _tc_uart_.bad_stop_bit(_last_data_status_); }
             
-            void flush(void) { _tc_uart_.flush(); } 
+            void flush(void) override { _tc_uart_.flush(); } 
             
-            void flushRX(void) { _tc_uart_.flush_rx(); }
+            void flushRX(void) override { _tc_uart_.flush_rx(); }
             
             size_t write(uint8_t data) 
             {
@@ -881,7 +881,7 @@
             timer_ids get_timer() { return _tc_uart_.get_timer(); }
       
             using Print::write; // pull in write(str) and write(buf, size) from Print
-            operator bool() { return true; } 
+            operator bool() override { return true; } 
       
           private:
       
