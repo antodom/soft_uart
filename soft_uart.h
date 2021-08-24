@@ -847,7 +847,7 @@
             
             void flush(void) override { _tc_uart_.flush(); } 
             
-            void flushRX(void) override { _tc_uart_.flush_rx(); }
+            void flushRX(void) { _tc_uart_.flush_rx(); }
             
             size_t write(uint8_t data) 
             {
